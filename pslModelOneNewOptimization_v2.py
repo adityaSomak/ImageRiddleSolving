@@ -247,6 +247,9 @@ sortedScoreAndIndexList, targetWordsList, targetWordsDictonary, pairwiseDistance
 	m = Model("psl1");
 	m.setParam(GRB.Param.TimeLimit, 20.0)
 	m.setParam("LogFile", "");
+	#m.setParam(GRB.Param.Cuts, 1);
+	#m.setParam(GRB.Param.Heuristics, 0.01);
+	# NOTE: m.setParam(GRB.Param.Presolve, 2) does not help
 	
 	if not VERBOSE:
 		setParam('OutputFlag', 0);
@@ -279,6 +282,10 @@ sortedScoreAndIndexList, targetWordsList, targetWordsDictonary, pairwiseDistance
 
 	# Update model to integrate new variables
 	m.update()
+	# m.tune()
+	# for i in range(m.tuneResultCount):
+	# 	m.getTuneResult(i)
+	# 	m.write('tune'+str(i)+'.prm')
 	m.optimize();
 	
 	if m.SolCount > 0:

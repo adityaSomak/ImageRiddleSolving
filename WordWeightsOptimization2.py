@@ -148,7 +148,10 @@ inferenceFolder="intermediateFiles/opt_test/"):
 		lines = processClarifaiJsonFile(detectionFolder+imagePrefix+"_"+str(img)+".txt");
 	
 		detections = (lines[15][2:lines[15].index("]")]).split(",");
-		weights = (lines[16][2:lines[16].index("]")]).split(",");
+		if lines[15].endswith('probs'):
+			weights = (lines[16][2:lines[16].index("]")]).split(",");
+		else:
+			weights = (lines[17][2:lines[17].index("]")]).split(",");
 		if VERBOSE:
 			print(detections)
 	
@@ -217,6 +220,7 @@ inferenceFolder="intermediateFiles/opt_test/"):
 
 		# Update model to integrate new variables
 		m.update()
+		### TODO: try using model.tune()
 		m.optimize();
 		#m.write('organizingNetwork.lp');
 		#m.write('organizingNetwork.sol');

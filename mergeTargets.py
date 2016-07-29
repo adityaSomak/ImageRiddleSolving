@@ -40,6 +40,13 @@ def mergeTargetsFromDetectedSeeds(reweightedSeedsFileImg, allSeedsMapFile, alpha
 	# key= target-word, value =list corresponding to each seed in @seedWordsList.
 	targetWordsDictionary= {};
 		
+	#semanticSimSeeds = set();
+	#semanticSimFile = 	"intermediateFiles/allTargets/semanticSimSeeds.txt";
+	#with open(semanticSimFile,"r") as f:
+	#	for line in f:
+	#		semanticSimSeeds.add(line);
+
+	#TODO: parallelize this for loop	
 	for indexSeed in range(0,len(seedWordsList)):
 		seedWord = seedWordsList[indexSeed];
 		seedWeight = seedsDetected_weights[seedWord];
@@ -100,13 +107,13 @@ def mergeTargetsFromDetectedSeeds(reweightedSeedsFileImg, allSeedsMapFile, alpha
 			if len(tokens) < 3:
 				continue;
 			targetWord = tokens[0][6:];
-			if targetWord not in targetWordsDictionary.keys():
-				targetWordsDictionary[targetWord] = np.zeros(len(seedWordsList));
 			
+			finalSim = 0;
 			normalizedAssocSpaceSimilarity = util.computeNormalizedValue(float(tokens[len(tokens)-2]),\
 			1,-1);
 			if usingSemanticSim:
-				targetWordsDictionary[targetWord][indexSeed] = normalizedAssocSpaceSimilarity;
+				finalSim = normalizedAssocSpaceSimilarity;
+				#targetWordsDictionary[targetWord][indexSeed] = normalizedAssocSpaceSimilarity;
 			else:
 				if tokens[len(tokens)-1] == "nan":
 					visualSimilarity = 1.0;
@@ -114,10 +121,20 @@ def mergeTargetsFromDetectedSeeds(reweightedSeedsFileImg, allSeedsMapFile, alpha
 					visualSimilarity = float(tokens[len(tokens)-1]);
 
 				if visualSimilarity == 1.0:
-					targetWordsDictionary[targetWord][indexSeed] = normalizedAssocSpaceSimilarity;
+					finalSim = normalizedAssocSpaceSimilarity;
+					#targetWordsDictionary[targetWord][indexSeed] = normalizedAssocSpaceSimilarity;
 				else:
-					targetWordsDictionary[targetWord][indexSeed] = (alpha1 *visualSimilarity + \
-					alpha2*normalizedAssocSpaceSimilarity)/(alpha1+alpha2);
+					finalSim = (alpha1 *visualSimilarity + alpha2*normalizedAssocSpaceSimilarity)/(alpha1+alpha2);
+					#targetWordsDictionary[targetWord][indexSeed] = (alpha1 *visualSimilarity + \
+					#alpha2*normalizedAssocSpaceSimilarity)/(alpha1+alpha2);
+
+			try:
+				targetWordsDictionary[targetWord][indexSeed] = finalSim;
+			except KeyError:
+				targetWordsDictionary[targetWord] = np.zeros(len(seedWordsList));
+				targetWordsDictionary[targetWord][indexSeed] = finalSim;
+			#if targetWord not in targetWordsDictionary.keys():
+			#	targetWordsDictionary[targetWord] = np.zeros(len(seedWordsList));
 			i=i+1;
 	
 	print "\tthe target dictionary is loaded...";

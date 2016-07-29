@@ -322,6 +322,7 @@ sortedScoreAndIndexList, targetWordsList, targetWordsDictonary, clusters, pairwi
 
 	# Update model to integrate new variables
 	m.update()
+	### TODO: try using model.tune()
 	m.optimize();
 	
 	detectedSeedsFileName = reweightedSeedsFile[reweightedSeedsFile.rindex("/")+1:reweightedSeedsFile.index(".")];
