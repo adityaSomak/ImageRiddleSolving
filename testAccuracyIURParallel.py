@@ -64,7 +64,7 @@ def solveIndividualRiddles(detectionFolder,prefix,allSeedsDictionary,inferenceFo
 	orderedSeedWordsList,reweightedSeedsFileName,sortedScoreAndIndexList, targetWordsList, targetWordsDictonary, \
 	pairwiseDistancesTargetWords);
 
-	[acc,simWord]= calculateRelativeAccuracy(prefix, finalReorderedTargetsFileName, 50);	
+	[acc,simWord]= calculateRelativeAccuracy(prefix, finalReorderedTargetsFileName, 20);	
 	print('\taccuracy %g' % acc);
 	sumIndividualAccuracy = sumIndividualAccuracy+acc;
 	return sumIndividualAccuracy;
@@ -76,7 +76,9 @@ parameterSpace = [(0.9,1,0.4,2,1,4)];#\
 #(0.9,2,0.3,1,3,4),\
 #(0.9,2,0.3,3,3,4)];
 
-print("python ",sys.argv[0]," <seedsCentralityfile> <detectionsFolder> <number-of-puzzles> <inferenceFolder> <from>,<to>")
+if len(sys.argv) < 4:
+	print("python ",sys.argv[0]," <seedsCentralityfile> <detectionsFolder> <number-of-puzzles> <inferenceFolder> <from>,<to> parallel")
+	sys.exit();
 
 seedsCentralityFile = sys.argv[1];
 allSeedsDictionary = util.populateModifiedSeedsAndConcreteScoreDictionary(seedsCentralityFile);

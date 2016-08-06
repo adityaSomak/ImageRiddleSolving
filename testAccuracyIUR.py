@@ -140,7 +140,7 @@ for choice in parameterSpace:
 					orderedSeedWordsList,reweightedSeedsFileName,sortedScoreAndIndexList, targetWordsList, targetWordsDictonary, \
 					pairwiseDistancesTargetWords);
 			
-					[acc,simWord]= calculateRelativeAccuracy(prefix, finalReorderedTargetsFileName, 50);	
+					[acc,simWord]= calculateRelativeAccuracy(prefix, finalReorderedTargetsFileName, 20);	
 					print('\taccuracy %g' % acc);
 					sumIndividualAccuracy = sumIndividualAccuracy+acc;
 					

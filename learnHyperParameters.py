@@ -29,8 +29,8 @@ def calculateRelativeAccuracy(expectedWord, finalReorderedTargetsFileName, limit
 	
 sim_threshold_space = [0.7,0.8,0.9];#np.arange(0.3,0.9,0.1);
 top_k_sim_targets_space = np.arange(1,4,1);
-sim_threshold_onewordrule_space = np.arange(0.2,0.9,0.1);
-sum_confidence_limit_space = np.arange(1,7,1);
+sim_threshold_onewordrule_space = np.arange(0.2,0.8,0.1);
+sum_confidence_limit_space = np.arange(1,5,1);
 conceptnet_sim_wt_space = np.arange(1,5,1);
 word2vec_sim_wt_space = np.arange(1,5,1);
 
@@ -46,6 +46,15 @@ detectionFolder = sys.argv[2]+"Detection/";
 
 sortedFilePrefixList_file = sys.argv[2]+"filelist.txt";
 partsList = sys.argv[4].split(";");
+
+choicesTriedAlready = set();
+with open('accuracyFile_paramspace_old.txt','r') as f:
+	for line in f:
+		tokens=line.split("\t");
+		choicesTriedAlready.add(tokens[0]);
+
+for choice in choicesTriedAlready:
+	print(choice);
 
 accuracyFile = open('accuracyFile_paramspace.txt','w');
 
@@ -74,6 +83,17 @@ for choice in parameterSearchChoices:
 	
 	z= rest%len(word2vec_sim_wt_space);
 	
+	choiceString = str(sim_threshold_space[u])+","+str(top_k_sim_targets_space[v])+","+\
+	str(sim_threshold_onewordrule_space[w])+","+str(sum_confidence_limit_space[x])+","+\
+	str(conceptnet_sim_wt_space[y])+","+str(word2vec_sim_wt_space[z]);
+	if choiceString in choicesTriedAlready:
+		continue;
+	### Remove this later
+	lastThreeChoiceString = str(sum_confidence_limit_space[x])+","+str(conceptnet_sim_wt_space[y])\
+	+","+str(word2vec_sim_wt_space[z]);
+	if lastThreeChoiceString == "1,1,1":
+		continue;
+	
 	util.setParameters(sim_threshold_space[u],top_k_sim_targets_space[v],sim_threshold_onewordrule_space[w],\
 	sum_confidence_limit_space[x],conceptnet_sim_wt_space[y],word2vec_sim_wt_space[z]);
 		
@@ -91,7 +111,7 @@ for choice in parameterSearchChoices:
 		i=0;
 		for prefix in myfile:
 			prefix = prefix.replace("\n","");
-			if i == numberOfTrainingImages:
+			if i >= numberOfTrainingImages:
 				break;
 			try:
 				print('Iteration for prefix:%g\t%s\n' % (parameterSearchTries,prefix));
@@ -126,11 +146,11 @@ for choice in parameterSearchChoices:
 					acc= calculateRelativeAccuracy(prefix, finalReorderedTargetsFileName, 100);	
 					print('\taccuracy %g' % acc);
 					sumAccuracy = sumAccuracy+acc;
-					i=i+1;
+				i=i+1;
 			except Exception as e:
-				pass
+				raise e
 			
-			if i%25==0:
+			if i%50==0:
 				string = str(sim_threshold_space[u])+","+str(top_k_sim_targets_space[v])+","+str(sim_threshold_onewordrule_space[w])+","+\
 				str(sum_confidence_limit_space[x])+","+str(conceptnet_sim_wt_space[y])+","+str(word2vec_sim_wt_space[z])+"\t"+str(sumAccuracy)+"\n";
 				accuracyFile.write(string);
