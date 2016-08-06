@@ -1,0 +1,13 @@
+0.9,1,0.4,2,1,4	0
+aardvark	hippopotamus	0.724152532203
+abacus	art_paper	0.655555309372
+abandoned	inside_house	0.647360025153
+ablaze	fire	0.759587025513
+aboard	walk_along_beach	0.578501250962
+abode	house_wall	0.700046772436
+above	this_even	0.640865366015
+absurd	unbeautiful	0.66422763369
+academic	educational_organization	0.737015917214
+academy	art_school	0.706600361924
+access	visual_information_source	0.6755045859
+accident	safety_car	0.682624283567
