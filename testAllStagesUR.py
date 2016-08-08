@@ -34,12 +34,32 @@ def calculateRelativeAccuracy(expectedWord, finalReorderedTargetsFileName, limit
 			i=i+1;
 	return [maxSimilarity,similarWord];
 
-# TODO: Implement Method
 # Normalize seed names, normalize the weights as in other Re-weighting.
 # Write the re-weighted file.
 def normalizeSeedsAndWeights(allSeedsDictionary,detectionFolder,prefix,\
 	imageNum,imageNum,inferenceFolder):
-	raise NotImplementedError;
+	lines = WordWeightsOptimization2.processClarifaiJsonFile(detectionFolder+prefix+"_"+str(imageNum)+".txt");
+	detections = (lines[15][2:lines[15].index("]")]).split(",");
+	if lines[15].endswith('probs'):
+		weights = (lines[16][2:lines[16].index("]")]).split(",");
+	else:
+		weights = (lines[17][2:lines[17].index("]")]).split(",");
+    sumTotal = 0;
+    seeds = [];
+    newWeights =[];
+    for index_i in range(len(detections)):
+    	detection = detections[index_i].strip();
+		newWeight = float(weights[index_i]);
+		if detection not in allSeedsDictionary.keys():
+			continue;
+		sumTotal = sumTotal+newWeight;
+		newWeights.append(newWeight);
+		seeds.append(allSeedsDictionary[detection][1]);
+    for index_i in range(len(detections)):
+		seed_i = seeds[index_i];
+		normalizedWeight = newWeights[index_i]/sumTotal;
+		print(index_i,"\t",seed_i,"\t",allSeedsDictionary[seed_i][0],"\t",normalizedWeight,file=outputFile);
+	return outputFile.name;
 
 def solveIndividualRiddles(detectionFolder,prefix,allSeedsDictionary,inferenceFolder,seedsCentralityFile,
 	pipelineStage, imageNum):
