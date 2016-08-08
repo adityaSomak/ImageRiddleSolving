@@ -4,9 +4,73 @@ import collections
 import util
 import os
 import numpy as np
+import scipy
 
 from gensim import models
 
+
+#%%%%%%%%
+## Get word2vec vectors for Targets for all images. 
+## Calculate mean for all images. Order the targets and output.
+#%%%%%%%%
+def orderMergedTargetsAccordingToCentroid(mergeStageDSTuples, allSeedsDictionary, inferenceFolder, seedPrefix):
+	vectors = [];
+	words = set();
+	for mergeDS in mergeStageDSTuples:
+		sortedScoreAndIndexList= mergeDS[0];
+		targetWordsList= mergeDS[1];
+		targetWordsDictonary = mergeDS[2];
+		for indexTarget in range(0,len(50)):
+			indexAndScore = sortedScoreAndIndexList[indexTarget];
+			targetWord = targetWordsList[indexAndScore[0]];
+			words.add(targetWord);
+	words = list(words);
+	for targetWord in words:
+		targetVector = conceptnet_util.getWord2VecVector(targetWord);
+		vectors.append(targetVector);
+	meanVector = np.mean(vectors);
+	tuples =[];
+	for i in xrange(len(words)):
+		dist = scipy.spatial.distance.cosine(meanVector,vectors[i]);
+		tuples.append((dist,word));
+	sorted(tuples,key=lambda x:x[0]);
+	outputFile = open(inferenceFolder+"opt_"+seedPrefix+"_inf_all.txt","w");
+	for tup in tuples:
+		print('%s\t%g\t%g' % (tup[0], tup[1], allSeedsDictionary[tup[0]][2]),file=outputFile);
+	outputFile.close();
+	return outputFile.name;
+
+#%%%%%%%%
+## Take the mean of the means for all images.
+## Get the most similar words from word2vec model to this mean.
+## Write down these words in a file.
+#%%%%%%%%
+def orderWordsAccordingToCentroid(centroids, reweightedSeedsFiles, allSeedsDictionary, inferenceFolder, seedPrefix):
+	meanVector = np.mean(centroids);
+	tuples = word2vec_model.similar_by_vector(meanVector,topn=20);
+	outputFile = open(inferenceFolder+"opt_"+seedPrefix+"_inf_all.txt","w");
+	for tup in tuples:
+		print('%s\t%g\t%g' % (tup[0], tup[1], allSeedsDictionary[tup[0]][2]),file=outputFile);
+	outputFile.close();
+	return outputFile.name;
+
+#%%%%%%%%
+## Get word2vec vectors for Seeds. Calculate mean.
+#%%%%%%%%
+def calculateWord2vecCentroidAndHighestAcc(allSeedsDictionary, reweightedSeedsFileName):
+	# read the weights and seed_in_CNet
+	seedsDetected_weights = util.readReweightedSeeds(reweightedSeedsFileName,allSeedsDictionary);
+	seedWordsList = list(seedsDetected_weights.keys());
+	meanVector = None;
+	for indexSeed in range(0,len(seedWordsList)):
+		seedWord = seedWordsList[indexSeed];
+		seedVector = getWord2VecVector(seedWord);
+		if meanVector == None:
+			meanVector = seedVector;
+		else:
+			meanVector = meanVector+seedVector;
+	meanVector = meanVector/len(seedWordsList);		
+	return meanVector;
 
 def getHypernymFilter(seedsDetected_weights,allSeedsDictionary):
 	detections = list(seedsDetected_weights.keys());

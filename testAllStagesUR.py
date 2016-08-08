@@ -35,18 +35,6 @@ def calculateRelativeAccuracy(expectedWord, finalReorderedTargetsFileName, limit
 	return [maxSimilarity,similarWord];
 
 # TODO: Implement Method
-def orderMergedTargetsAccordingToCentroid(mergeStageDSTuples):
-	raise NotImplementedError;
-
-# TODO: Implement Method
-def orderWordsAccordingToCentroid(centroids, reweightedSeedsFiles):
-	raise NotImplementedError;
-
-# TODO: Implement Method
-def calculateWord2vecCentroidAndAcc(reweightedSeedsFileName):
-	raise NotImplementedError;
-
-# TODO: Implement Method
 # Normalize seed names, normalize the weights as in other Re-weighting.
 # Write the re-weighted file.
 def normalizeSeedsAndWeights(allSeedsDictionary,detectionFolder,prefix,\
@@ -63,8 +51,8 @@ def solveIndividualRiddles(detectionFolder,prefix,allSeedsDictionary,inferenceFo
 	print("\treweighting seeds completed..");
 	if pipelineStage == "clarifai":
 		## Note: We will not do parallel processing for this
-		[acc,centroid] = calculateWord2vecCentroidAndAcc(reweightedSeedsFileName);
-		return [acc,centroid,reweightedSeedsFileName];
+		centroid = conceptnet_util.calculateWord2vecCentroidAndHighestAcc(allSeedsDictionary,reweightedSeedsFileName);
+		return [centroid,reweightedSeedsFileName];
 
 	#### Step 1: Merge targets from different seeds.
 	mergeTargets.VERBOSE= False;
@@ -193,9 +181,9 @@ with open(sortedFilePrefixList_file, 'r') as myfile:
 							allSeedsDictionary, inferenceFolder, seedsCentralityFile, pipelineStage,\
 							imageNum);
 					elif pipelineStage == "clarifai":
-						[acc, centroid, reweightedSeedsFileName] = solveIndividualRiddles(detectionFolder,prefix,\
+						[centroid, reweightedSeedsFileName] = solveIndividualRiddles(detectionFolder,prefix,\
 							allSeedsDictionary, inferenceFolder, seedsCentralityFile, pipelineStage, imageNum);
-						sumAccuracy = sumAccuracy+acc;
+						#sumAccuracy = sumAccuracy+acc;
 						centroids.append(centroid);
 						reweightedSeedsFiles.append(reweightedSeedsFileName);
 					elif pipelineStage == "merge":
@@ -211,9 +199,11 @@ with open(sortedFilePrefixList_file, 'r') as myfile:
 				pslTwo.VERBOSE= False;
 				finalTargetsFileName = pslTwo.callPSLModelTwo(allSeedsDictionary,inferenceFolder,prefix);
 			elif pipelineStage == "clarifai":
-				finalTargetsFileName = orderWordsAccordingToCentroid(centroids, reweightedSeedsFiles);
+				finalTargetsFileName = conceptnet_util.orderWordsAccordingToCentroid(centroids, reweightedSeedsFiles, \
+					allSeedsDictionary, inferenceFolder, seedPrefix);
 			elif pipelineStage == "merge":
-				finalTargetsFileName = orderMergedTargetsAccordingToCentroid(mergeStageDSTuples);
+				finalTargetsFileName = conceptnet_util.orderMergedTargetsAccordingToCentroid(mergeStageDSTuples, \
+					allSeedsDictionary, inferenceFolder, seedPrefix);
 
 			[acc,simWord] = calculateRelativeAccuracy(prefix, finalTargetsFileName, 20);
 			if simWord != None:

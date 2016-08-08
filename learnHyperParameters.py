@@ -64,46 +64,59 @@ for i in range(10001,len(list1)*len(sum_confidence_limit_space)*len(list3)):
 	if j < 9999:
 		parameterSearchChoices[j]=i;
 
+FIXED = True;
+fixedChoices = [(0.9,1,0.4,2,1,4),\
+(0.9,2,0.3,2,1,1),(0.9,2,0.7,2,1,1),\
+(0.8,2,0.2,2,1,1),(0.9,1,0.2,2,1,1),\
+(0.8,1,0.4,1,1,4),(0.9,1,0.7,2,1,4)];
+
 parameterSearchTries=0;
-for choice in parameterSearchChoices:
-	u = choice%len(sim_threshold_space);
-	rest = choice/len(sim_threshold_space);
+choices = parameterSearchChoices;
+if FIXED:
+	choices = fixedChoices;
+
+for choice in choices:
+	if not FIXED:
+		u = choice%len(sim_threshold_space);
+		rest = choice/len(sim_threshold_space);
+
+		v= rest%len(top_k_sim_targets_space);
+		rest= rest/len(top_k_sim_targets_space);
+
+		w= rest%len(sim_threshold_onewordrule_space);
+		rest= rest/len(sim_threshold_onewordrule_space);
+
+		x= rest%len(sum_confidence_limit_space);
+		rest= rest/len(sum_confidence_limit_space);
+
+		y= rest%len(conceptnet_sim_wt_space);
+		rest= rest/len(conceptnet_sim_wt_space);
+
+		z= rest%len(word2vec_sim_wt_space);
+
+		choiceString = str(sim_threshold_space[u])+","+str(top_k_sim_targets_space[v])+","+\
+		str(sim_threshold_onewordrule_space[w])+","+str(sum_confidence_limit_space[x])+","+\
+		str(conceptnet_sim_wt_space[y])+","+str(word2vec_sim_wt_space[z]);
+		if choiceString in choicesTriedAlready:
+			continue;
+		### Remove this later
+		lastThreeChoiceString = str(sum_confidence_limit_space[x])+","+str(conceptnet_sim_wt_space[y])\
+		+","+str(word2vec_sim_wt_space[z]);
+		if lastThreeChoiceString == "1,1,1":
+			continue;
 	
-	v= rest%len(top_k_sim_targets_space);
-	rest= rest/len(top_k_sim_targets_space);
-	
-	w= rest%len(sim_threshold_onewordrule_space);
-	rest= rest/len(sim_threshold_onewordrule_space);
-	
-	x= rest%len(sum_confidence_limit_space);
-	rest= rest/len(sum_confidence_limit_space);
-	
-	y= rest%len(conceptnet_sim_wt_space);
-	rest= rest/len(conceptnet_sim_wt_space);
-	
-	z= rest%len(word2vec_sim_wt_space);
-	
-	choiceString = str(sim_threshold_space[u])+","+str(top_k_sim_targets_space[v])+","+\
-	str(sim_threshold_onewordrule_space[w])+","+str(sum_confidence_limit_space[x])+","+\
-	str(conceptnet_sim_wt_space[y])+","+str(word2vec_sim_wt_space[z]);
-	if choiceString in choicesTriedAlready:
-		continue;
-	### Remove this later
-	lastThreeChoiceString = str(sum_confidence_limit_space[x])+","+str(conceptnet_sim_wt_space[y])\
-	+","+str(word2vec_sim_wt_space[z]);
-	if lastThreeChoiceString == "1,1,1":
-		continue;
-	
-	util.setParameters(sim_threshold_space[u],top_k_sim_targets_space[v],sim_threshold_onewordrule_space[w],\
-	sum_confidence_limit_space[x],conceptnet_sim_wt_space[y],word2vec_sim_wt_space[z]);
-		
-	if parameterSearchTries >= 9999:
-		break;
+		util.setParameters(sim_threshold_space[u],top_k_sim_targets_space[v],sim_threshold_onewordrule_space[w],\
+			sum_confidence_limit_space[x],conceptnet_sim_wt_space[y],word2vec_sim_wt_space[z]);
+		if parameterSearchTries >= 9999:
+			break;
+	else:
+		util.setParameters(choice[0],choice[1],choice[2],choice[3],choice[4],choice[5]);
+		choiceString = str(choice[0])+","+str(choice[1])+","+ str(choice[2])+","+str(choice[3])+","+\
+		str(choice[4])+","+str(choice[5]);
 	
 	print('\nIteration for try:%g' % (parameterSearchTries));
 	sumAccuracy = 0;
-	string = str(sim_threshold_space[u])+","+str(top_k_sim_targets_space[v])+","+str(sim_threshold_onewordrule_space[w])+","+\
-	str(sum_confidence_limit_space[x])+","+str(conceptnet_sim_wt_space[y])+","+str(word2vec_sim_wt_space[z])+"\t"+str(sumAccuracy)+"\n";
+	string = choiceString+"\t"+str(sumAccuracy)+"\n";
 	accuracyFile.write(string);
 	accuracyFile.flush();
 	
@@ -151,13 +164,11 @@ for choice in parameterSearchChoices:
 				raise e
 			
 			if i%50==0:
-				string = str(sim_threshold_space[u])+","+str(top_k_sim_targets_space[v])+","+str(sim_threshold_onewordrule_space[w])+","+\
-				str(sum_confidence_limit_space[x])+","+str(conceptnet_sim_wt_space[y])+","+str(word2vec_sim_wt_space[z])+"\t"+str(sumAccuracy)+"\n";
+				string = choiceString+"\t"+str(sumAccuracy)+"\n";
 				accuracyFile.write(string);
 				accuracyFile.flush();
 			
-	string = str(sim_threshold_space[u])+","+str(top_k_sim_targets_space[v])+","+str(sim_threshold_onewordrule_space[w])+","+\
-	str(sum_confidence_limit_space[x])+","+str(conceptnet_sim_wt_space[y])+","+str(word2vec_sim_wt_space[z])+"\t"+str(sumAccuracy)+"\n"
+	string = choiceString+"\t"+str(sumAccuracy)+"\n"
 	accuracyFile.write(string);
 	parameterSearchTries= parameterSearchTries+1;
 
