@@ -107,27 +107,27 @@ if len(sys.argv) > 7:
 sortedFilePrefixList_file = sys.argv[2]+"filelist.txt";
 
 if startPuzzle != -1:
-	accuracyFile = open('accuracyResults/GUR/accuracyFile_all_puzzles_'+str(startPuzzle)+'_gur.txt','w');
+	accuracyFile = open('accuracyResults/GUR/accuracyFile_all_puzzles_'+str(pipelineStage)+'_'+\
+		str(startPuzzle)+'_gur.txt','w');
 else:
-	accuracyFile = open('accuracyResults/GUR/accuracyFile_all_puzzles_gur.txt','w');
+	accuracyFile = open('accuracyResults/GUR/accuracyFile_all_puzzles_'+str(pipelineStage)+'_gur.txt','w');
 
 startTime = time.time();
 if startPuzzle != -1:
-	puzzleAccuracyFile = open('accuracyResults/GUR/accuracyFile_all_puzzles_'+str(pipelineStage)+'_'+\
+	puzzleAccuracyFile = open('accuracyResults/GUR/accuracyFile_all_images_'+str(pipelineStage)+'_'+\
 		str(startPuzzle)+'_'+str(endPuzzle)+'_gur.txt','w');
 else:
-	puzzleAccuracyFile = open('accuracyResults/GUR/accuracyFile_all_puzzles_'+str(pipelineStage)+'_gur.txt','w');
+	puzzleAccuracyFile = open('accuracyResults/GUR/accuracyFile_all_images_'+str(pipelineStage)+'_gur.txt','w');
 util.setParameters(choice[0],choice[1],choice[2],choice[3],choice[4],choice[5]);
 
 sumIndividualAccuracy = 0;
 sumPuzzleAccuracy=0;
-string = str(choice[0])+","+str(choice[1])+","+str(choice[2])+","+\
-str(choice[3])+","+str(choice[4])+","+str(choice[5])+"\t"+str(sumIndividualAccuracy)+"\n";
+choiceString = ','.join(str(x) for x in choice);
+string = choiceString+"\t"+str(sumIndividualAccuracy)+"\n";
 accuracyFile.write(string);
 accuracyFile.flush();
 
-string = str(choice[0])+","+str(choice[1])+","+str(choice[2])+","+\
-str(choice[3])+","+str(choice[4])+","+str(choice[5])+"\t"+str(sumPuzzleAccuracy)+"\n";
+string = choiceString+"\t"+str(sumPuzzleAccuracy)+"\n";
 puzzleAccuracyFile.write(string);
 puzzleAccuracyFile.flush();
 
@@ -210,19 +210,16 @@ with open(sortedFilePrefixList_file, 'r') as myfile:
 			raise
 		
 		if i%50==0:
-			string = str(choice[0])+","+str(choice[1])+","+str(choice[2])+","+\
-			str(choice[3])+","+str(choice[4])+","+str(choice[5])+"\t"+str(sumIndividualAccuracy)+"\n";
+			string = choiceString+"\t"+str(sumIndividualAccuracy)+"\n";
 			accuracyFile.write(string);
 			accuracyFile.flush();
 			puzzleAccuracyFile.flush();
 		
 tries= tries+1;
-string = str(choice[0])+","+str(choice[1])+","+str(choice[2])+","+\
-str(choice[3])+","+str(choice[4])+","+str(choice[5])+"\t"+str(sumIndividualAccuracy)+"\n";
+string = choiceString+"\t"+str(sumIndividualAccuracy)+"\n";
 accuracyFile.write(string);
 
-string = str(choice[0])+","+str(choice[1])+","+str(choice[2])+","+\
-str(choice[3])+","+str(choice[4])+","+str(choice[5])+"\t"+str(sumPuzzleAccuracy)+"\n";
+string = choiceString+"\t"+str(sumPuzzleAccuracy)+"\n";
 puzzleAccuracyFile.write(string);
 puzzleAccuracyFile.close();
 
