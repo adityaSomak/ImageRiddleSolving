@@ -1,0 +1,56 @@
+All Seed Collection from Clarifai Files
+---------------------------------------
+python findFiles.py $ARG0 > $OP0
+
+copy the file $OP0 to $ARG0
+copy seeds.sh to $ARG0
+execute 
+./seeds.sh $OP0
+
+
+Directories SETUP:
+------------------
+CONCEPTNET_UTIL:Requires:: ../conceptnet5/data/assoc/assoc-space-5.4;
+CONCEPTNET_UTIL:Requires:: ../../../DATASETS/GoogleNews-vectors-negative300.bin;
+mergeTargets:Requires:: intermediateFiles/allTargets/test1/;
+						|
+						|_aardvark__targets__sorted.txt
+						|_aardvark__targets_.txt
+						|_...
+
+
+
+
+All 3333 Riddles:
+-----------------
+-----------------
+
+Base Form Creation:
+-------------------
+python targetsFileBaseWords.py ../First250riddles/riddlesDetectionAll/seeds3333_for_conceptnet.txt > intermediateFiles/lemmatizedSeeds_all3k.txt
+python EigenvectorCentrality.py intermediateFiles/lemmatizedSeeds_all3k.txt > intermediateFiles/lemmatizedSeedsCentralized_all3k.txt
+
+Sort Suggested Targets:
+-----------------------
+./sortSuggestedTargets.sh intermediateFiles/allTargets/test1
+
+
+Run IUR:
+--------
+python testAccuracyIUR.py intermediateFiles/lemmatizedSeedsCentralized_all3k.txt ../First250riddles/riddlesDetectionAll/ 
+3333 intermediateFiles/output3k/ > tempOp_overall.txt 2> err_ov.txt &
+
+Run GUR:
+--------
+python testAccuracyGUR.py intermediateFiles/lemmatizedSeedsCentralized_all3k.txt ../First250riddles/riddlesDetectionAll/ 
+3333 intermediateFiles/output3k/ > tempOp_overall.txt 2> err_ov.txt &
+
+
+---------------------------------------------------
+Gitlab Commit:
+--------------
+git status
+git add *.py
+git commit -m "pushing riddle code" *.py
+git push -u origin master
+
