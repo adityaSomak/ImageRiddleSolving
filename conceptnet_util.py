@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from conceptnet5.query import *
 from assoc_space import AssocSpace
 import collections

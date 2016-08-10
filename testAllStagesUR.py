@@ -184,56 +184,56 @@ with open(sortedFilePrefixList_file, 'r') as myfile:
 			i=i+1;
 			continue;
 
-		try:
-			print('Iteration for prefix:\t%s\n' % (prefix));
-			
-			sumAccuracy=0;
-			if len(sys.argv) > 6 and sys.argv[7] == "parallel":
-				sumAccuracy = Parallel(n_jobs=4)(delayed(solveIndividualRiddles)(detectionFolder, prefix,\
-					allSeedsDictionary, inferenceFolder, seedsCentralityFile,imageNum) for imageNum in range(1,5));
-			else:
-				centroids =[];
-				reweightedSeedsFiles =[];
-				mergeStageDSTuples =[];
-				for imageNum in range(1,5):
-					if pipelineStage == "all":
-						sumAccuracy = sumAccuracy+ solveIndividualRiddles(detectionFolder,prefix,\
-							allSeedsDictionary, inferenceFolder, seedsCentralityFile, pipelineStage,\
-							imageNum);
-					elif pipelineStage == "clarifai":
-						[centroid, reweightedSeedsFileName] = solveIndividualRiddles(detectionFolder,prefix,\
-							allSeedsDictionary, inferenceFolder, seedsCentralityFile, pipelineStage, imageNum);
-						#sumAccuracy = sumAccuracy+acc;
-						centroids.append(centroid);
-						reweightedSeedsFiles.append(reweightedSeedsFileName);
-					elif pipelineStage == "merge":
-						[sortedScoreAndIndexList, targetWordsList, targetWordsDictonary] = solveIndividualRiddles(\
-							detectionFolder,prefix,allSeedsDictionary, inferenceFolder, \
-							seedsCentralityFile, pipelineStage, imageNum);
-						mergeStageDSTuples.append((sortedScoreAndIndexList, targetWordsList, targetWordsDictonary));
-			
+		#try:
+		print('Iteration for prefix:\t%s\n' % (prefix));
+		
+		sumAccuracy=0;
+		if len(sys.argv) > 7 and sys.argv[7] == "parallel":
+			sumAccuracy = Parallel(n_jobs=4)(delayed(solveIndividualRiddles)(detectionFolder, prefix,\
+				allSeedsDictionary, inferenceFolder, seedsCentralityFile,pipelineStage, imageNum) for imageNum in range(1,5));
 			for acc in sumAccuracy:
-				sumIndividualAccuracy=acc+sumAccuracy;
-				
-			if pipelineStage == "all":
-				pslTwo.VERBOSE= False;
-				finalTargetsFileName = pslTwo.callPSLModelTwo(allSeedsDictionary,inferenceFolder,prefix);
-			elif pipelineStage == "clarifai":
-				finalTargetsFileName = conceptnet_util.orderWordsAccordingToCentroid(centroids, reweightedSeedsFiles, \
-					allSeedsDictionary, inferenceFolder, seedPrefix);
-			elif pipelineStage == "merge":
-				finalTargetsFileName = conceptnet_util.orderMergedTargetsAccordingToCentroid(mergeStageDSTuples, \
-					allSeedsDictionary, inferenceFolder, seedPrefix);
+				sumIndividualAccuracy=acc+sumIndividualAccuracy;
+		else:
+			centroids =[];
+			reweightedSeedsFiles =[];
+			mergeStageDSTuples =[];
+			for imageNum in range(1,5):
+				if pipelineStage == "all":
+					sumAccuracy = sumAccuracy+ solveIndividualRiddles(detectionFolder,prefix,\
+						allSeedsDictionary, inferenceFolder, seedsCentralityFile, pipelineStage,\
+						imageNum);
+				elif pipelineStage == "clarifai":
+					[centroid, reweightedSeedsFileName] = solveIndividualRiddles(detectionFolder,prefix,\
+						allSeedsDictionary, inferenceFolder, seedsCentralityFile, pipelineStage, imageNum);
+					#sumAccuracy = sumAccuracy+acc;
+					centroids.append(centroid);
+					reweightedSeedsFiles.append(reweightedSeedsFileName);
+				elif pipelineStage == "merge":
+					[sortedScoreAndIndexList, targetWordsList, targetWordsDictonary] = solveIndividualRiddles(\
+						detectionFolder,prefix,allSeedsDictionary, inferenceFolder, \
+						seedsCentralityFile, pipelineStage, imageNum);
+					mergeStageDSTuples.append((sortedScoreAndIndexList, targetWordsList, targetWordsDictonary));
+				sumIndividualAccuracy= sumAccuracy+sumIndividualAccuracy;
+			
+		if pipelineStage == "all":
+			pslTwo.VERBOSE= False;
+			finalTargetsFileName = pslTwo.callPSLModelTwo(allSeedsDictionary,inferenceFolder,prefix);
+		elif pipelineStage == "clarifai":
+			finalTargetsFileName = conceptnet_util.orderWordsAccordingToCentroid(centroids, reweightedSeedsFiles, \
+				allSeedsDictionary, inferenceFolder, seedPrefix);
+		elif pipelineStage == "merge":
+			finalTargetsFileName = conceptnet_util.orderMergedTargetsAccordingToCentroid(mergeStageDSTuples, \
+				allSeedsDictionary, inferenceFolder, seedPrefix);
 
-			[acc,simWord] = calculateRelativeAccuracy(prefix, finalTargetsFileName, 20);
-			if simWord != None:
-				sumPuzzleAccuracy= sumPuzzleAccuracy+acc;
-				string= prefix+"\t"+simWord+"\t"+str(acc)+"\n";
-				puzzleAccuracyFile.write(string);
+		[acc,simWord] = calculateRelativeAccuracy(prefix, finalTargetsFileName, 20);
+		if simWord != None:
+			sumPuzzleAccuracy= sumPuzzleAccuracy+acc;
+			string= prefix+"\t"+simWord+"\t"+str(acc)+"\n";
+			puzzleAccuracyFile.write(string);
 
-			i=i+1;
-		except Exception as e:
-			raise
+		i=i+1;
+		#except Exception as e:
+		#	raise e
 		
 		if i%50==0:
 			string = choiceString+"\t"+str(sumIndividualAccuracy)+"\n";
@@ -241,7 +241,6 @@ with open(sortedFilePrefixList_file, 'r') as myfile:
 			accuracyFile.flush();
 			puzzleAccuracyFile.flush();
 		
-tries= tries+1;
 string = choiceString+"\t"+str(sumIndividualAccuracy)+"\n";
 accuracyFile.write(string);
 

@@ -244,7 +244,8 @@ sortedScoreAndIndexList, targetWordsList, targetWordsDictonary, pairwiseDistance
 	if VERBOSE:
 		print(seedHypernymFilterSet);
 	# Model
-	m = Model("psl1");
+	modelName = "psl1"+reweightedSeedsFile[reweightedSeedsFile.rindex("/")+1:reweightedSeedsFile.index(".")];
+	m = Model(modelName);
 	m.setParam(GRB.Param.TimeLimit, 20.0)
 	m.setParam("LogFile", "");
 	#m.setParam(GRB.Param.Cuts, 1);
@@ -288,10 +289,10 @@ sortedScoreAndIndexList, targetWordsList, targetWordsDictonary, pairwiseDistance
 	# 	m.write('tune'+str(i)+'.prm')
 	m.optimize();
 	
-	if m.SolCount > 0:
-		detectedSeedsFileName = reweightedSeedsFile[reweightedSeedsFile.rindex("/")+1:reweightedSeedsFile.index(".")];
-		m.write('optimization_output/out'+detectedSeedsFileName+'.lp');
-		m.write('optimization_output/out'+detectedSeedsFileName+'.sol');
+	#if m.SolCount > 0:
+	#	detectedSeedsFileName = reweightedSeedsFile[reweightedSeedsFile.rindex("/")+1:reweightedSeedsFile.index(".")];
+	#	m.write('optimization_output/out'+detectedSeedsFileName+'.lp');
+	#	m.write('optimization_output/out'+detectedSeedsFileName+'.sol');
 	
 	filePrefix = reweightedSeedsFile[:reweightedSeedsFile.index(".")];
 	outputFile = open(filePrefix+"_inf.txt","w");
