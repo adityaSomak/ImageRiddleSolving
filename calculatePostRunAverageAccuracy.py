@@ -2,6 +2,13 @@ import conceptnet_util
 import sys
 import os
 
+'''
+ This file is called after the IUR/UR/GUR scripts are run and it calculates 
+ an accuracy comparing the target answer and the final predicted words in
+ _inf_all.txt files.
+
+ NOTE: Currently as a cleanup, it can be used to delete all other files to save space.
+'''
 def calculateRelativeAccuracy(expectedWord, finalReorderedTargetsFileName, limitSuggestions=10):
 	if "-" in expectedWord:
 		expectedWord=expectedWord[:expectedWord.index("-")];
@@ -19,16 +26,23 @@ def calculateRelativeAccuracy(expectedWord, finalReorderedTargetsFileName, limit
 	return avgSimilarity;
 
 
-for root, directories, filenames in os.walk(sys.argv[1]):
-	totalSim = 0;
-	totalDetected=0;
-	for filename in filenames:
-		filePath = str(os.path.join(root,filename));
-		if filePath.endswith("_inf_all.txt"):
-			expectedWord = filename[4:].replace("_inf_all.txt","");
-			print expectedWord;
-			sim = calculateRelativeAccuracy(expectedWord, filePath, 10);
-			totalSim = sim+totalSim;
-			totalDetected = totalDetected+1;
-	string = str(totalDetected)+","+str(totalSim);
-	print string;
+if __name__ == "__main__":
+	cleanup = False
+	if sys.argv[1] == "del":
+		cleanup = True;
+
+	for root, directories, filenames in os.walk(sys.argv[1]):
+		totalSim = 0;
+		totalDetected=0;
+		for filename in filenames:
+			filePath = str(os.path.join(root,filename));
+			if filePath.endswith("_inf_all.txt"):
+				expectedWord = filename[4:].replace("_inf_all.txt","");
+				print expectedWord;
+				sim = calculateRelativeAccuracy(expectedWord, filePath, 10);
+				totalSim = sim+totalSim;
+				totalDetected = totalDetected+1;
+			elif cleanup:
+				os.remove(filePath);
+		string = str(totalDetected)+","+str(totalSim);
+		print string;

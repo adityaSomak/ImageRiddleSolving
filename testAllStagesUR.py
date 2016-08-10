@@ -37,7 +37,7 @@ def calculateRelativeAccuracy(expectedWord, finalReorderedTargetsFileName, limit
 # Normalize seed names, normalize the weights as in other Re-weighting.
 # Write the re-weighted file.
 def normalizeSeedsAndWeights(allSeedsDictionary,detectionFolder,prefix,\
-	imageNum,imageNum,inferenceFolder):
+	imageNum,inferenceFolder):
 	lines = WordWeightsOptimization2.processClarifaiJsonFile(detectionFolder+prefix+"_"+str(imageNum)+".txt");
 	detections = (lines[15][2:lines[15].index("]")]).split(",");
 	if lines[15].endswith('probs'):
@@ -67,7 +67,7 @@ def solveIndividualRiddles(detectionFolder,prefix,allSeedsDictionary,inferenceFo
 	trainingImage = detectionFolder+prefix+"_"+str(imageNum)+".txt";
 	WordWeightsOptimization2.VERBOSE = False;
 	reweightedSeedsFileName = normalizeSeedsAndWeights(allSeedsDictionary,\
-	detectionFolder,prefix,int(imageNum),int(imageNum),inferenceFolder);
+	detectionFolder,prefix,int(imageNum),inferenceFolder);
 	print("\treweighting seeds completed..");
 	if pipelineStage == "clarifai":
 		## Note: We will not do parallel processing for this
@@ -102,12 +102,13 @@ def solveIndividualRiddles(detectionFolder,prefix,allSeedsDictionary,inferenceFo
 	sumIndividualAccuracy = sumIndividualAccuracy+acc;
 	return sumIndividualAccuracy;
 	
-#(0.8,1,0.8,2,1,4),\ #done
-choice = (0.9,1,0.4,2,1,4);#\
-#(0.8,1,0.4,1,1,4),\
-#(0.9,1,0.4,1,1,4),\
-#(0.9,2,0.3,1,3,4),\
-#(0.9,2,0.3,3,3,4)];
+choice = (0.9,1,0.4,2,1,4);#paramChoice1
+#choice = (0.9,2,0.7,2,1,1);#paramChoice2
+#(0.9,2,0.3,2,1,1);#paramChoice3
+#(0.8,1,0.4,1,1,4);#paramChoice4
+#(0.9,1,0.4,1,1,4);#paramChoice5
+#(0.9,2,0.3,1,3,4);#paramChoice6
+#(0.9,2,0.3,3,3,4);#paramChoice7
 
 if len(sys.argv) < 4:
 	print("python ",sys.argv[0]," <seedsCentralityfile> <detectionsFolder> <number-of-puzzles> \

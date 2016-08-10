@@ -40,13 +40,16 @@ def loadAllSeedsAndModifiedSeedsCNet(modifiedSeedsMapFile,offset=0):
 
 
 ## Read from the detected-seeds file (after re-weighting) from an image
-def readReweightedSeeds(detectedSeedsFileName,allSeedsDictionary,addIndex=False,index=-1):
+def readReweightedSeeds(detectedSeedsFileName,allSeedsDictionary,normalize=True,addIndex=False,index=-1):
 	seedsDetected_weights ={};
 	with open(detectedSeedsFileName, "r") as f:
 		for line in f:
 			tokens = line.split("\t");
 			tokens =  map(lambda x:x.strip(),tokens);
-			weight = computeNormalizedValue(float(tokens[3]),2.0,0);
+			if normalize:
+				weight = computeNormalizedValue(float(tokens[3]),2.0,0);
+			else:
+				weight = float(tokens[3]);
 			#if tokens[1] not in allSeedsDetected_toCNet.keys():
 			#seedsDetected_weights[tokens[1]]= weight;
 			#else:

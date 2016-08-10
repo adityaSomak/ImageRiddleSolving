@@ -71,13 +71,14 @@ def solveIndividualRiddles(detectionFolder,prefix,allSeedsDictionary,inferenceFo
 	print('\taccuracy %g' % acc);
 	sumIndividualAccuracy = sumIndividualAccuracy+acc;
 	return sumIndividualAccuracy;
-	
-#(0.8,1,0.8,2,1,4),\ #done
-choice = (0.9,1,0.4,2,1,4);#\
-#(0.8,1,0.4,1,1,4),\
-#(0.9,1,0.4,1,1,4),\
-#(0.9,2,0.3,1,3,4),\
-#(0.9,2,0.3,3,3,4)];
+
+choice = (0.9,1,0.4,2,1,4);#paramChoice1
+#choice = (0.9,2,0.7,2,1,1);#paramChoice2
+#(0.9,2,0.3,2,1,1);#paramChoice3
+#(0.8,1,0.4,1,1,4);#paramChoice4
+#(0.9,1,0.4,1,1,4);#paramChoice5
+#(0.9,2,0.3,1,3,4);#paramChoice6
+#(0.9,2,0.3,3,3,4);#paramChoice7
 
 if len(sys.argv) < 4:
 	print("python ",sys.argv[0]," <seedsCentralityfile> <detectionsFolder> <number-of-puzzles> \

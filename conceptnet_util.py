@@ -61,7 +61,7 @@ def orderWordsAccordingToCentroid(centroids, reweightedSeedsFiles, allSeedsDicti
 #%%%%%%%%
 def calculateWord2vecCentroidAndHighestAcc(allSeedsDictionary, reweightedSeedsFileName):
 	# read the weights and seed_in_CNet
-	seedsDetected_weights = util.readReweightedSeeds(reweightedSeedsFileName,allSeedsDictionary);
+	seedsDetected_weights = util.readReweightedSeeds(reweightedSeedsFileName,allSeedsDictionary,False);
 	seedWordsList = list(seedsDetected_weights.keys());
 	meanVector = None;
 	for indexSeed in range(0,len(seedWordsList)):
