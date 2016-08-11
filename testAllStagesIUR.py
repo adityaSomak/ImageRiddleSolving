@@ -196,7 +196,7 @@ with open(sortedFilePrefixList_file, 'r') as myfile:
 			finalTargetsFileName = pslTwo.callPSLModelTwo(allSeedsDictionary,inferenceFolder,prefix);
 		elif pipelineStage == "clarifai":
 			finalTargetsFileName = conceptnet_util.orderWordsAccordingToCentroid(centroids, reweightedSeedsFiles, \
-				allSeedsDictionary, inferenceFolder, seedPrefix);
+				allSeedsDictionary, inferenceFolder, prefix);
 		elif pipelineStage == "merge":
 			finalTargetsFileName = conceptnet_util.orderMergedTargetsAccordingToCentroid(mergeStageDSTuples, \
 				allSeedsDictionary, inferenceFolder, seedPrefix);

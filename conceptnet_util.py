@@ -48,30 +48,39 @@ def orderMergedTargetsAccordingToCentroid(mergeStageDSTuples, allSeedsDictionary
 ## Write down these words in a file.
 #%%%%%%%%
 def orderWordsAccordingToCentroid(centroids, reweightedSeedsFiles, allSeedsDictionary, inferenceFolder, seedPrefix):
-	meanVector = np.mean(centroids);
-	tuples = word2vec_model.similar_by_vector(meanVector,topn=20);
+	meanVector = np.mean(centroids,axis=0);
+	tuples = word2vec_model.similar_by_vector(meanVector,topn=25);
 	outputFile = open(inferenceFolder+"opt_"+seedPrefix+"_inf_all.txt","w");
 	for tup in tuples:
-		print('%s\t%g\t%g' % (tup[0], tup[1], allSeedsDictionary[tup[0]][2]),file=outputFile);
+		try:
+			word = tup[0].encode('utf-8');
+			if word.replace("_","").isalnum():
+				print('%s\t%g\t%g' % (word, tup[1], allSeedsDictionary[word][2]),file=outputFile);
+		except KeyError:
+			if word.replace("_","").isalnum():
+				print('%s\t%g\t' % (word, tup[1]),file=outputFile);
+		except UnicodeDecodeError:
+			pass
 	outputFile.close();
 	return outputFile.name;
 
 #%%%%%%%%
-## Get word2vec vectors for Seeds. Calculate mean.
+## Get word2vec vectors for Seeds. Calculate weighted mean.
 #%%%%%%%%
 def calculateWord2vecCentroidAndHighestAcc(allSeedsDictionary, reweightedSeedsFileName):
 	# read the weights and seed_in_CNet
 	seedsDetected_weights = util.readReweightedSeeds(reweightedSeedsFileName,allSeedsDictionary,False);
 	seedWordsList = list(seedsDetected_weights.keys());
-	meanVector = None;
+	meanVector = 0;
 	for indexSeed in range(0,len(seedWordsList)):
 		seedWord = seedWordsList[indexSeed];
+		weight = seedsDetected_weights[seedWord];
 		seedVector = getWord2VecVector(seedWord);
-		if meanVector == None:
-			meanVector = seedVector;
+		if indexSeed == 0:
+			meanVector = seedVector*weight;
 		else:
-			meanVector = meanVector+seedVector;
-	meanVector = meanVector/len(seedWordsList);		
+			meanVector = meanVector+seedVector*weight;
+	#meanVector = meanVector/len(seedWordsList);		
 	return meanVector;
 
 def getHypernymFilter(seedsDetected_weights,allSeedsDictionary):
@@ -261,5 +270,6 @@ assocDir = "../conceptnet5/data/assoc/assoc-space-5.4";
 assocSpace = AssocSpace.load_dir(assocDir);
 names = assocSpace.labels
 word2vec_model =  models.word2vec.Word2Vec.load_word2vec_format('../../../DATASETS/GoogleNews-vectors-negative300.bin', binary=True);
+word2vec_model.init_sims(replace=True);
 TOO_RARE_WORD_CODE=-3;
 NOT_FOUND_IN_CORPUS_CODE=-2;

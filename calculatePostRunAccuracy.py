@@ -30,7 +30,7 @@ def calculateMaxAccuracy(expectedWord, finalReorderedTargetsFileName, limitSugge
 		expectedWord=expectedWord[:expectedWord.index("-")];
 	maxSimilarity = 0.0;
 	with open(finalReorderedTargetsFileName, 'r') as f:
-		i=0.0;
+		i=0;
 		for line in f:
 			tokens =line.split("\t");
 			if i==limitSuggestions:

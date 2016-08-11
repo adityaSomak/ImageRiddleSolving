@@ -44,18 +44,19 @@ def normalizeSeedsAndWeights(allSeedsDictionary,detectionFolder,prefix,\
 		weights = (lines[16][2:lines[16].index("]")]).split(",");
 	else:
 		weights = (lines[17][2:lines[17].index("]")]).split(",");
-    sumTotal = 0;
-    seeds = [];
-    newWeights =[];
-    for index_i in range(len(detections)):
-    	detection = detections[index_i].strip();
+	sumTotal = 0;
+	seeds = [];
+	newWeights =[];
+	for index_i in range(len(detections)):
+		detection = detections[index_i].strip();
 		newWeight = float(weights[index_i]);
 		if detection not in allSeedsDictionary.keys():
 			continue;
 		sumTotal = sumTotal+newWeight;
 		newWeights.append(newWeight);
 		seeds.append(allSeedsDictionary[detection][1]);
-    for index_i in range(len(detections)):
+	outputFile = open(inferenceFolder+"opt_"+prefix+"_"+str(imageNum)+"_c.txt","w");
+	for index_i in range(len(seeds)):
 		seed_i = seeds[index_i];
 		normalizedWeight = newWeights[index_i]/sumTotal;
 		print(index_i,"\t",seed_i,"\t",allSeedsDictionary[seed_i][0],"\t",normalizedWeight,file=outputFile);
@@ -221,10 +222,10 @@ with open(sortedFilePrefixList_file, 'r') as myfile:
 			finalTargetsFileName = pslTwo.callPSLModelTwo(allSeedsDictionary,inferenceFolder,prefix);
 		elif pipelineStage == "clarifai":
 			finalTargetsFileName = conceptnet_util.orderWordsAccordingToCentroid(centroids, reweightedSeedsFiles, \
-				allSeedsDictionary, inferenceFolder, seedPrefix);
+				allSeedsDictionary, inferenceFolder, prefix);
 		elif pipelineStage == "merge":
 			finalTargetsFileName = conceptnet_util.orderMergedTargetsAccordingToCentroid(mergeStageDSTuples, \
-				allSeedsDictionary, inferenceFolder, seedPrefix);
+				allSeedsDictionary, inferenceFolder, prefix);
 
 		[acc,simWord] = calculateRelativeAccuracy(prefix, finalTargetsFileName, 20);
 		if simWord != None:
