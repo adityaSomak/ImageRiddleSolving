@@ -76,8 +76,8 @@ def solveIndividualRiddles(detectionFolder,prefix,allSeedsDictionary,inferenceFo
 	sumIndividualAccuracy = sumIndividualAccuracy+acc;
 	return sumIndividualAccuracy;
 
-#paramChoice1- (0.9,1,0.4,2,1,4);\
-choice = (0.9,2,0.7,2,1,1);#paramChoice2
+choice = (0.9,1,0.4,2,1,4);#paramChoice1
+#choice = (0.9,2,0.7,2,1,1);#paramChoice2
 #(0.9,2,0.3,2,1,1);#paramChoice3
 #(0.8,1,0.4,1,1,4);#paramChoice4
 #(0.9,1,0.4,1,1,4);#paramChoice5
@@ -140,11 +140,6 @@ puzzleAccuracyFile.flush();
 with open(sortedFilePrefixList_file, 'r') as myfile:
 	i=0;
 	for prefix in myfile:
-		prefix = prefix.replace("\n","");
-		finalOutputFileName = inferenceFolder+"opt_"+prefix+"_inf_all.txt";
-		if os.path.isfile(finalOutputFileName):
-			i=i+1;
-			continue;
 		if startPuzzle != -1 and i < startPuzzle:
 			i=i+1;
 			continue;
@@ -152,6 +147,11 @@ with open(sortedFilePrefixList_file, 'r') as myfile:
 			break;
 		if i == numberOfPuzzles:
 			break;
+		prefix = prefix.replace("\n","");
+		finalOutputFileName = inferenceFolder+"opt_"+prefix+"_inf_all.txt";
+		if os.path.isfile(finalOutputFileName):
+			i=i+1;
+			continue;
 				
 		prefixMinus = prefix;
 		if "-" in prefix:

@@ -74,14 +74,19 @@ def loadDecisionVariablesForTargets(m,targets,variables,targetsToCentralities):
 def createObjective(m,seeds,targets,variables,objective,targetsToCentralities,seedsDetected_weights):
 	globalWeightSum=0;
 	tupleOfObjectives=[];
+	#print(seedsDetected_weights.keys());
 	for seed_index in seedsDetected_weights.keys():
 		seedWithoutIndex =  seed_index[:len(seed_index)-1];
 		tuplesOfConstraints=[];
 		for targetWord in targetsToCentralities.keys():
 			centralityOfTarget = targetsToCentralities[targetWord];
 			
+			#try:
 			sim_word1 = conceptnet_util.getSimilarity(seedWithoutIndex,targetWord,True);
 			word2vecsimilarity = conceptnet_util.getWord2VecSimilarity(seedWithoutIndex,targetWord,True);
+			#except KeyError as e:
+			#print("seedWithoutIndex:%s, targetWord:%s\n" % (seedWithoutIndex,targetWord));
+			#raise e;
 			if word2vecsimilarity == conceptnet_util.NOT_FOUND_IN_CORPUS_CODE:
 				similarity = sim_word1;
 			else:
@@ -167,7 +172,7 @@ def callPSLModelTwo(allSeedsDictionary,inferenceFolder,seedPrefix):
 	targetsToCentralities={};
 	for index in range(1,5):
 		reweightedSeedsFileName = inferenceFolder+"opt_"+seedPrefix+"_"+str(index)+"_c.txt";
-		newSeedsAndWeights= util.readReweightedSeeds(reweightedSeedsFileName,allSeedsDictionary,True,index);
+		newSeedsAndWeights= util.readReweightedSeeds(reweightedSeedsFileName,allSeedsDictionary,True,True,index);
 		seedsDetected_weights.update(newSeedsAndWeights);
 		#print(seedsDetected_weights);
 		
@@ -193,7 +198,7 @@ if __name__ == "__main__":
 	targetsToCentralities={};
 	for index in range(1,5):
 		reweightedSeedsFileName = sys.argv[1]+"opt_"+sys.argv[2]+"_"+str(index)+"_c.txt";
-		newSeedsAndWeights= util.readReweightedSeeds(reweightedSeedsFileName,allSeedsDictionary,True,index);
+		newSeedsAndWeights= util.readReweightedSeeds(reweightedSeedsFileName,allSeedsDictionary,True,True,index);
 		seedsDetected_weights.update(newSeedsAndWeights);
 		#print(seedsDetected_weights);
 		

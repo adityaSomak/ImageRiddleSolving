@@ -167,17 +167,18 @@ puzzleAccuracyFile.flush();
 with open(sortedFilePrefixList_file, 'r') as myfile:
 	i=0;
 	for prefix in myfile:
-		prefix = prefix.replace("\n","");
-		finalOutputFileName = inferenceFolder+"opt_"+prefix+"_inf_all.txt";
-		if os.path.isfile(finalOutputFileName):
-			i=i+1;
-			continue;
 		if startPuzzle != -1 and i < startPuzzle:
+			i=i+1;
 			continue;
 		if endPuzzle != -1 and i == endPuzzle:
 			break;
 		if i == numberOfPuzzles:
 			break;
+		prefix = prefix.replace("\n","");
+		finalOutputFileName = inferenceFolder+"opt_"+prefix+"_inf_all.txt";
+		if os.path.isfile(finalOutputFileName):
+			i=i+1;
+			continue;
 				
 		prefixMinus = prefix;
 		if "-" in prefix:

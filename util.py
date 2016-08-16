@@ -54,6 +54,7 @@ def readReweightedSeeds(detectedSeedsFileName,allSeedsDictionary,normalize=True,
 			#seedsDetected_weights[tokens[1]]= weight;
 			#else:
 			seedInCNet = allSeedsDictionary[tokens[1]][1];
+			#print seedInCNet+","+tokens[1];
 			if addIndex:
 				seedsDetected_weights[seedInCNet+str(index)]= weight;
 			else:
