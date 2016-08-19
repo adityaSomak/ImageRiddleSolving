@@ -45,15 +45,6 @@ def mergeBasedOnFunction(newWeight,detection,detectionIndices,node_scores,functi
 		node_scores[index] = min(newWeight,oldWeight);
 	elif function=="avg":
 		node_scores[index] = newWeight+oldWeight;
-	
-def processClarifaiJsonFile(fileName):
-	with open(fileName, 'r') as myfile:
-		line = myfile.read();
-	line = line.replace("u\'", "");
-	line = line.replace("\'", "");
-	line = line.replace(":", "\n");
-	lines = line.split("\n");
-	return lines;
 
 ########
 ## ASSUMPTION 1: similarity Threshold = 0.5 
@@ -138,20 +129,19 @@ write the outputs separately.
 NOTE: Currently not using collpaseHypernyms here.
 '''	
 def reorderWeightsBasedOnPopularity(allSeedsDictionary,detectionFolder,imagePrefix,numberOfImages,startRange=1,\
-inferenceFolder="intermediateFiles/opt_test/"):
+inferenceFolder="intermediateFiles/opt_test/", apiUsed="clarifai"):
 	outputFileNames=[]
 	print(util.SIMILARITY_THRESHOLD_WORDWEIGHTS);
 	for img in range(startRange,int(numberOfImages)+1):
 		detectionIndices = {}; ## detected seed -> index, index -> seed
 		node_scores=[];  ## the initial confidences for each word.
 		bias_scores=[];  ## the index,bias/centrality-scores for each word.
-		lines = processClarifaiJsonFile(detectionFolder+imagePrefix+"_"+str(img)+".txt");
-	
-		detections = (lines[15][2:lines[15].index("]")]).split(",");
-		if lines[15].endswith('probs'):
-			weights = (lines[16][2:lines[16].index("]")]).split(",");
+		if apiUsed == "clarifai":
+			[detections, weights] = util.processClarifaiJsonFile(detectionFolder+imagePrefix+"_"+str(img)+".txt");
 		else:
-			weights = (lines[17][2:lines[17].index("]")]).split(",");
+			[detections, weights] = util.getDetectionsFromTSVFile(detectionFolder+imagePrefix+"_"+str(img)+".txt");
+			detections = conceptnet_util.chooseSingleRepresentativeDetection(allSeedsDictionary, detections);
+		
 		if VERBOSE:
 			print(detections)
 	

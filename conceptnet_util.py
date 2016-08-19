@@ -22,26 +22,48 @@ def orderMergedTargetsAccordingToCentroid(mergeStageDSTuples, allSeedsDictionary
 		sortedScoreAndIndexList= mergeDS[0];
 		targetWordsList= mergeDS[1];
 		targetWordsDictonary = mergeDS[2];
-		for indexTarget in range(0,len(50)):
+		for indexTarget in range(50):
 			indexAndScore = sortedScoreAndIndexList[indexTarget];
 			targetWord = targetWordsList[indexAndScore[0]];
 			words.add(targetWord);
 	words = list(words);
 	for targetWord in words:
-		targetVector = conceptnet_util.getWord2VecVector(targetWord);
+		targetVector = getWord2VecVector(targetWord);
 		vectors.append(targetVector);
-	meanVector = np.mean(vectors);
+	meanVector = np.mean(vectors,axis=0);
 	tuples =[];
-	for i in xrange(len(words)):
+	for i in range(len(words)):
 		dist = scipy.spatial.distance.cosine(meanVector,vectors[i]);
-		tuples.append((dist,word));
-	sorted(tuples,key=lambda x:x[0]);
+		tuples.append((dist,words[i]));
+	tuples = sorted(tuples,key=lambda x:abs(x[0]));
 	outputFile = open(inferenceFolder+"opt_"+seedPrefix+"_inf_all.txt","w");
 	for tup in tuples:
-		print('%s\t%g\t%g' % (tup[0], tup[1], allSeedsDictionary[tup[0]][2]),file=outputFile);
+		try:
+			print('%s\t%g\t%g' % (tup[1], tup[0], allSeedsDictionary[tup[1]][2]),file=outputFile);
+		except KeyError:
+			print('%s\t%g' % (tup[1], tup[0]),file=outputFile);
 	outputFile.close();
 	return outputFile.name;
 
+'''
+Special heuristic for choosing a single detection from the comma-separated list
+that the DeepResNet provides. 
+'''
+def chooseSingleRepresentativeDetection(allSeedsDictionary, detections):
+	finalDetections = [];
+	for detectionArr in detections:
+		individualDetections = detectionArr.split(",");
+		for detection in individualDetections:
+			cNetSeed = None;
+			try:
+				cNetSeed = allSeedsDictionary[detection.strip()];
+			except KeyError, e:
+				pass;
+			if cNetSeed != None:
+				finalDetections.append(cNetSeed);
+				break;
+	return finalDetections;
+	
 #%%%%%%%%
 ## Take the mean of the means for all images.
 ## Get the most similar words from word2vec model to this mean.

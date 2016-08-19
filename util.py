@@ -22,6 +22,31 @@ def populateModifiedSeedsAndConcreteScoreDictionary(modifiedSeedsMapFile,loadCon
 	return allSeedsDictionary
 
 
+def processClarifaiJsonFile(fileName):
+	with open(fileName, 'r') as myfile:
+		line = myfile.read();
+	line = line.replace("u\'", "");
+	line = line.replace("\'", "");
+	line = line.replace(":", "\n");
+	lines = line.split("\n");
+
+	detections = (lines[15][2:lines[15].index("]")]).split(",");
+	if lines[15].endswith('probs'):
+		weights = (lines[16][2:lines[16].index("]")]).split(",");
+	else:
+		weights = (lines[17][2:lines[17].index("]")]).split(",");
+	return [detections, weights];
+
+def getDetectionsFromTSVFile(fileName):
+	detections=[];
+	weights=[];
+	with open(fileName, 'r') as myfile:
+		for lines in myfile:
+			tokens = line.split("\t");
+			weights.append(tokens[0]);
+			detections.append(tokens[1]);
+	return [detections,weights];
+
 ########################################################################
 ############# Load All Seeds and Seeds_in_CNet
 ########################################################################

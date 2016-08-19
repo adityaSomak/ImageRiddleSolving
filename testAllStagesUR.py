@@ -37,13 +37,13 @@ def calculateRelativeAccuracy(expectedWord, finalReorderedTargetsFileName, limit
 # Normalize seed names, normalize the weights as in other Re-weighting.
 # Write the re-weighted file.
 def normalizeSeedsAndWeights(allSeedsDictionary,detectionFolder,prefix,\
-	imageNum,inferenceFolder):
-	lines = WordWeightsOptimization2.processClarifaiJsonFile(detectionFolder+prefix+"_"+str(imageNum)+".txt");
-	detections = (lines[15][2:lines[15].index("]")]).split(",");
-	if lines[15].endswith('probs'):
-		weights = (lines[16][2:lines[16].index("]")]).split(",");
+	imageNum,inferenceFolder,apiUsed="clarifai"):
+	if apiUsed == "clarifai":
+		[detections,weights] = util.processClarifaiJsonFile(detectionFolder+prefix+"_"+str(imageNum)+".txt");
 	else:
-		weights = (lines[17][2:lines[17].index("]")]).split(",");
+		[detections,weights] = util.getDetectionsFromTSVFile(detectionFolder+imagePrefix+"_"+str(img)+".txt");
+		detections = conceptnet_util.chooseSingleRepresentativeDetection(allSeedsDictionary, detections);
+
 	sumTotal = 0;
 	seeds = [];
 	newWeights =[];

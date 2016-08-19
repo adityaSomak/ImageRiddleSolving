@@ -47,23 +47,13 @@ def getAverageSimilarity(allSeedsDictionary,seed, img_i, weights_all_images,dete
 				cosineSim = np.dot(image_J_vector,seedVector)/(seedNorm*norms_images[img_j]);
 				avgSim=avgSim+cosineSim;
 	return avgSim/4.0;
-
-
-def processClarifaiJsonFile(fileName):
-	with open(fileName, 'r') as myfile:
-		line = myfile.read();
-	line = line.replace("u\'", "");
-	line = line.replace("\'", "");
-	line = line.replace(":", "\n");
-	lines = line.split("\n");
-	return lines;
 	
 '''
 Iterate over each image, for each word- get the average similarity to the other
 image-vectors.
 '''	
 def reorderWeightsBasedOnCloseness(allSeedsDictionary,detectionFolder,imagePrefix,\
-inferenceFolder="intermediateFiles/opt_test/"):
+inferenceFolder="intermediateFiles/opt_test/",apiUsed="clarifai"):
 	outputFileNames=[];
 	
 	detection_all_images={};
@@ -71,10 +61,12 @@ inferenceFolder="intermediateFiles/opt_test/"):
 	norms_images={}
 	### Load all 4 image-vectors
 	for img in range(1,5):
-		lines = processClarifaiJsonFile(detectionFolder+imagePrefix+"_"+str(img)+".txt");
-	
-		detections = (lines[15][2:lines[15].index("]")]).split(",");
-		weights = (lines[16][2:lines[16].index("]")]).split(",");
+		if apiUsed == "clarifai":
+			[detections, weights] = util.processClarifaiJsonFile(detectionFolder+imagePrefix+"_"+str(img)+".txt");
+		else:
+			[detections, weights] = util.getDetectionsFromTSVFile(detectionFolder+imagePrefix+"_"+str(img)+".txt");
+			detections = conceptnet_util.chooseSingleRepresentativeDetection(allSeedsDictionary, detections);
+
 		weights = map(lambda x: float(x),weights);
 		detections = map(lambda x: x.strip(),detections);
 		detection_all_images[img] = detections;

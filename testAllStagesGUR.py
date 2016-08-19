@@ -80,32 +80,43 @@ choice = (0.9,1,0.4,2,1,4);#paramChoice1
 #(0.9,2,0.3,1,3,4);#paramChoice6
 #(0.9,2,0.3,3,3,4);#paramChoice7
 
-if len(sys.argv) < 4:
-	print("python ",sys.argv[0]," <seedsCentralityfile> <detectionsFolder> <number-of-puzzles> \
-		<inferenceFolder> <stage> <from>,<to> parallel");
-	print("Stage options are: clarifai/merge/all.")
-	sys.exit();
+#if len(sys.argv) < 4:
+#	print("python ",sys.argv[0]," <seedsCentralityfile> <detectionsFolder> <number-of-puzzles> \
+#		<inferenceFolder> <stage> <from>,<to> parallel");
+#	print("Stage options are: clarifai/merge/all.")
+#	sys.exit();
 
-seedsCentralityFile = sys.argv[1];
+parser = argparse.ArgumentParser();
+parser.add_argument("seedsCentralityfile");
+parser.add_argument("detectionsFolder");
+parser.add_argument("numPuzzles");
+parser.add_argument("inferenceFolder");
+parser.add_argument("api",action="store", choices=["clarifai","resnet"]);
+parser.add_argument("-stage",action="store");
+parser.add_argument("-from",action="store");
+parser.add_argument("-to",action="store");
+parser.add_argument("-par",action="store");
+argsdict = vars(parser.parse_args(sys.argv[1:]));
+
+seedsCentralityFile =  argsdict["seedsCentralityfile"];
 allSeedsDictionary = util.populateModifiedSeedsAndConcreteScoreDictionary(seedsCentralityFile);
 
-detectionFolder = sys.argv[2]+"Detection/";
-numberOfPuzzles = int(sys.argv[3]);
-inferenceFolder = sys.argv[4];
-pipelineStage = sys.argv[5];
+detectionFolder =  argsdict["detectionsFolder"]+"Detection/";
+numberOfPuzzles = int(argsdict["numPuzzles"]);
+inferenceFolder = argsdict["inferenceFolder"];
+pipelineStage = argsdict["stage"];
+API_USED = argsdict["api"];
 startPuzzle =-1;
 endPuzzle = -1;
-if len(sys.argv) > 6:
-	tok = sys.argv[6].split(",");
-	startPuzzle = int(tok[0]);
-	endPuzzle = int(tok[1]);
+if argsdict["from"] != None and argsdict["to"]!=None:
+	startPuzzle = int(argsdict["from"]);
+	endPuzzle = int(argsdict["to"]);
 	numberOfPuzzles = endPuzzle - startPuzzle + 1;
-if len(sys.argv) > 7:
-	if sys.argv[6] == "parallel" and pipelineStage != "all":
+if argsdict["par"] == "parallel" and pipelineStage != "all":
 		print("Not Permitted!!! Use parallel only with all stages");
 		sys.exit();
 
-sortedFilePrefixList_file = sys.argv[2]+"filelist.txt";
+sortedFilePrefixList_file = argsdict["detectionsFolder"]+"filelist.txt";
 
 if startPuzzle != -1:
 	accuracyFile = open('accuracyResults/GUR/accuracyFile_all_puzzles_'+str(pipelineStage)+'_'+\
@@ -160,9 +171,9 @@ with open(sortedFilePrefixList_file, 'r') as myfile:
 		
 		WordWeightsOptimization3.VERBOSE = False;
 		reorderedSeedsFileNames = WordWeightsOptimization3.reorderWeightsBasedOnCloseness(allSeedsDictionary,\
-			detectionFolder,prefix,inferenceFolder);
+			detectionFolder,prefix,inferenceFolder,API_USED);
 		sumAccuracy=0;
-		if len(sys.argv) > 7 and sys.argv[7] == "parallel":
+		if argsdict["par"] == "parallel":
 			sumAccuracy = Parallel(n_jobs=4)(delayed(solveIndividualRiddles)(detectionFolder, prefix,\
 				allSeedsDictionary, inferenceFolder, seedsCentralityFile, pipelineStage,\
 				reorderedSeedsFileNames[imageNum-1], imageNum) for imageNum in range(1,5));
@@ -192,16 +203,15 @@ with open(sortedFilePrefixList_file, 'r') as myfile:
 				sumIndividualAccuracy= sumAccuracy+sumIndividualAccuracy;
 		
 
-			
 		if pipelineStage == "all":
 			pslTwo.VERBOSE= False;
 			finalTargetsFileName = pslTwo.callPSLModelTwo(allSeedsDictionary,inferenceFolder,prefix);
 		elif pipelineStage == "clarifai":
 			finalTargetsFileName = conceptnet_util.orderWordsAccordingToCentroid(centroids, reweightedSeedsFiles, \
-				allSeedsDictionary, inferenceFolder, seedPrefix);
+				allSeedsDictionary, inferenceFolder, prefix);
 		elif pipelineStage == "merge":
 			finalTargetsFileName = conceptnet_util.orderMergedTargetsAccordingToCentroid(mergeStageDSTuples, \
-				allSeedsDictionary, inferenceFolder, seedPrefix);
+				allSeedsDictionary, inferenceFolder, prefix);
 
 		[acc,simWord] = calculateRelativeAccuracy(prefix, finalTargetsFileName, 20);
 		if simWord != None:
