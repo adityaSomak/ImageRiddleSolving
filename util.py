@@ -1,4 +1,39 @@
+import sys
+import argparse
 
+def processAllArgumentsReturnVariables(sysarguments):
+	parser = argparse.ArgumentParser();
+	parser.add_argument("seedsCentralityfile");
+	parser.add_argument("detectionsFolder");
+	parser.add_argument("numPuzzles");
+	parser.add_argument("inferenceFolder");
+	parser.add_argument("api",action="store", choices=["clarifai","resnet"]);
+	parser.add_argument("-stage",action="store");
+	parser.add_argument("-from",action="store");
+	parser.add_argument("-to",action="store");
+	parser.add_argument("-par",action="store");
+	argsdict = vars(parser.parse_args(sysarguments));
+
+	seedsCentralityFile = argsdict["seedsCentralityfile"];
+	allSeedsDictionary = populateModifiedSeedsAndConcreteScoreDictionary(seedsCentralityFile);
+
+	detectionFolder = argsdict["detectionsFolder"]+"Detection/";
+	numberOfPuzzles = int(argsdict["numPuzzles"]);
+	inferenceFolder = argsdict["inferenceFolder"];
+	pipelineStage = argsdict["stage"];
+	API_USED = argsdict["api"];
+	startPuzzle =-1;
+	endPuzzle = -1;
+	if argsdict["from"] != None and argsdict["to"]!=None:
+		startPuzzle = int(argsdict["from"]);
+		endPuzzle = int(argsdict["to"]);
+		numberOfPuzzles = endPuzzle - startPuzzle + 1;
+	if argsdict["par"] == "parallel" and pipelineStage != "all":
+			print("Not Permitted!!! Use parallel only with all stages");
+			sys.exit();
+	sortedFilePrefixList_file = argsdict["detectionsFolder"]+"filelist.txt";		
+	return [seedsCentralityFile,allSeedsDictionary,detectionFolder,numberOfPuzzles,inferenceFolder,\
+	pipelineStage,API_USED,startPuzzle,endPuzzle,sortedFilePrefixList_file,argsdict];
 
 def populateModifiedSeedsAndConcreteScoreDictionary(modifiedSeedsMapFile,loadConcScores=True,weightConcScores=1.0):
 	# detected_seed -> centrality_score, seed_in_conceptnet, amtconcScore

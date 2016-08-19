@@ -63,12 +63,12 @@ def normalizeSeedsAndWeights(allSeedsDictionary,detectionFolder,prefix,\
 	return outputFile.name;
 
 def solveIndividualRiddles(detectionFolder,prefix,allSeedsDictionary,inferenceFolder,seedsCentralityFile,
-	pipelineStage, imageNum):
+	pipelineStage, imageNum, API_USED):
 	sumIndividualAccuracy = 0;
 	trainingImage = detectionFolder+prefix+"_"+str(imageNum)+".txt";
 	WordWeightsOptimization2.VERBOSE = False;
 	reweightedSeedsFileName = normalizeSeedsAndWeights(allSeedsDictionary,\
-	detectionFolder,prefix,int(imageNum),inferenceFolder);
+	detectionFolder,prefix,int(imageNum),inferenceFolder,API_USED);
 	print("\treweighting seeds completed..");
 	if pipelineStage == "clarifai":
 		## Note: We will not do parallel processing for this
@@ -111,32 +111,15 @@ choice = (0.9,1,0.4,2,1,4);#paramChoice1
 #(0.9,2,0.3,1,3,4);#paramChoice6
 #(0.9,2,0.3,3,3,4);#paramChoice7
 
-if len(sys.argv) < 4:
-	print("python ",sys.argv[0]," <seedsCentralityfile> <detectionsFolder> <number-of-puzzles> \
-		<inferenceFolder> <stage> <from>,<to> parallel");
-	print("Stage options are: clarifai/merge/all.")
-	sys.exit();
+#if len(sys.argv) < 4:
+#	print("python ",sys.argv[0]," <seedsCentralityfile> <detectionsFolder> <number-of-puzzles> \
+#		<inferenceFolder> <stage> <from>,<to> parallel");
+#	print("Stage options are: clarifai/merge/all.")
+#	sys.exit();
 
-seedsCentralityFile = sys.argv[1];
-allSeedsDictionary = util.populateModifiedSeedsAndConcreteScoreDictionary(seedsCentralityFile);
-
-detectionFolder = sys.argv[2]+"Detection/";
-numberOfPuzzles = int(sys.argv[3]);
-inferenceFolder = sys.argv[4];
-pipelineStage = sys.argv[5];
-startPuzzle =-1;
-endPuzzle = -1;
-if len(sys.argv) > 6:
-	tok = sys.argv[6].split(",");
-	startPuzzle = int(tok[0]);
-	endPuzzle = int(tok[1]);
-	numberOfPuzzles = endPuzzle - startPuzzle + 1;
-if len(sys.argv) > 7:
-	if sys.argv[6] == "parallel" and pipelineStage != "all":
-		print("Not Permitted!!! Use parallel only with all stages");
-		sys.exit();
-
-sortedFilePrefixList_file = sys.argv[2]+"filelist.txt";
+[seedsCentralityFile,allSeedsDictionary,detectionFolder,numberOfPuzzles,inferenceFolder,\
+	pipelineStage,API_USED,startPuzzle,endPuzzle,sortedFilePrefixList_file,argsdict] = \
+	util.processAllArgumentsReturnVariables(sys.argv[1:]);
 
 if startPuzzle != -1:
 	accuracyFile = open('accuracyResults/UR/accuracyFile_all_puzzles_'+str(pipelineStage)+'_'+\
@@ -191,7 +174,7 @@ with open(sortedFilePrefixList_file, 'r') as myfile:
 		print('Iteration for prefix:\t%s\n' % (prefix));
 		
 		sumAccuracy=0;
-		if len(sys.argv) > 7 and sys.argv[7] == "parallel":
+		if argsdict["par"] == "parallel":
 			sumAccuracy = Parallel(n_jobs=4)(delayed(solveIndividualRiddles)(detectionFolder, prefix,\
 				allSeedsDictionary, inferenceFolder, seedsCentralityFile,pipelineStage, imageNum) for imageNum in range(1,5));
 			for acc in sumAccuracy:
@@ -204,17 +187,18 @@ with open(sortedFilePrefixList_file, 'r') as myfile:
 				if pipelineStage == "all":
 					sumAccuracy = sumAccuracy+ solveIndividualRiddles(detectionFolder,prefix,\
 						allSeedsDictionary, inferenceFolder, seedsCentralityFile, pipelineStage,\
-						imageNum);
+						imageNum,API_USED);
 				elif pipelineStage == "clarifai":
 					[centroid, reweightedSeedsFileName] = solveIndividualRiddles(detectionFolder,prefix,\
-						allSeedsDictionary, inferenceFolder, seedsCentralityFile, pipelineStage, imageNum);
+						allSeedsDictionary, inferenceFolder, seedsCentralityFile, pipelineStage, imageNum,\
+						API_USED);
 					#sumAccuracy = sumAccuracy+acc;
 					centroids.append(centroid);
 					reweightedSeedsFiles.append(reweightedSeedsFileName);
 				elif pipelineStage == "merge":
 					[sortedScoreAndIndexList, targetWordsList, targetWordsDictonary] = solveIndividualRiddles(\
 						detectionFolder,prefix,allSeedsDictionary, inferenceFolder, \
-						seedsCentralityFile, pipelineStage, imageNum);
+						seedsCentralityFile, pipelineStage, imageNum,API_USED);
 					mergeStageDSTuples.append((sortedScoreAndIndexList, targetWordsList, targetWordsDictonary));
 				sumIndividualAccuracy= sumAccuracy+sumIndividualAccuracy;
 			
