@@ -129,6 +129,7 @@ def createObjective(m,seeds,targets,variables,objective,targetsToCentralities,se
 def optimizeAllAndInferConceptsModelTwo(targetsToCentralities,seedsDetected_weights,targetPrefix,pathPrefix):
 	# Model
 	m = Model("psl2")
+	m.setParam(GRB.Param.TimeLimit, 20.0);
 	variables= set();
 	seeds={};
 	loadDecisionVariablesForSeeds(m,seeds,variables,seedsDetected_weights);

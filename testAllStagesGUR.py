@@ -72,13 +72,6 @@ def solveIndividualRiddles(detectionFolder,prefix,allSeedsDictionary,inferenceFo
 	sumIndividualAccuracy = sumIndividualAccuracy+acc;
 	return sumIndividualAccuracy;
 
-choice = (0.9,1,0.4,2,1,4);#paramChoice1
-#choice = (0.9,2,0.7,2,1,1);#paramChoice2
-#(0.9,2,0.3,2,1,1);#paramChoice3
-#(0.8,1,0.4,1,1,4);#paramChoice4
-#(0.9,1,0.4,1,1,4);#paramChoice5
-#(0.9,2,0.3,1,3,4);#paramChoice6
-#(0.9,2,0.3,3,3,4);#paramChoice7
 
 #if len(sys.argv) < 4:
 #	print("python ",sys.argv[0]," <seedsCentralityfile> <detectionsFolder> <number-of-puzzles> \
@@ -90,18 +83,25 @@ choice = (0.9,1,0.4,2,1,4);#paramChoice1
 	pipelineStage,API_USED,startPuzzle,endPuzzle,sortedFilePrefixList_file,argsdict] = \
 	util.processAllArgumentsReturnVariables(sys.argv[1:]);
 
+accuracyResultsFolderprefix = "accuracyResults/GUR/";
+if API_USED != "clarifai":
+	accuracyResultsFolderprefix = "accuracyResults/resnet/GUR/";
+	choice = util.R_CHOICE;
+else:
+	choice = util.CHOICE;
+
 if startPuzzle != -1:
-	accuracyFile = open('accuracyResults/GUR/accuracyFile_all_puzzles_'+str(pipelineStage)+'_'+\
+	accuracyFile = open(accuracyResultsFolderprefix+'accuracyFile_all_puzzles_'+str(pipelineStage)+'_'+\
 		str(startPuzzle)+'_gur.txt','w');
 else:
-	accuracyFile = open('accuracyResults/GUR/accuracyFile_all_puzzles_'+str(pipelineStage)+'_gur.txt','w');
+	accuracyFile = open(accuracyResultsFolderprefix+'accuracyFile_all_puzzles_'+str(pipelineStage)+'_gur.txt','w');
 
 startTime = time.time();
 if startPuzzle != -1:
-	puzzleAccuracyFile = open('accuracyResults/GUR/accuracyFile_all_images_'+str(pipelineStage)+'_'+\
+	puzzleAccuracyFile = open(accuracyResultsFolderprefix+'accuracyFile_all_images_'+str(pipelineStage)+'_'+\
 		str(startPuzzle)+'_'+str(endPuzzle)+'_gur.txt','w');
 else:
-	puzzleAccuracyFile = open('accuracyResults/GUR/accuracyFile_all_images_'+str(pipelineStage)+'_gur.txt','w');
+	puzzleAccuracyFile = open(accuracyResultsFolderprefix+'accuracyFile_all_images_'+str(pipelineStage)+'_gur.txt','w');
 util.setParameters(choice[0],choice[1],choice[2],choice[3],choice[4],choice[5]);
 
 sumIndividualAccuracy = 0;

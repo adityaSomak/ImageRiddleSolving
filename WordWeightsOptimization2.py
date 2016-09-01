@@ -140,7 +140,7 @@ inferenceFolder="intermediateFiles/opt_test/", apiUsed="clarifai"):
 			[detections, weights] = util.processClarifaiJsonFile(detectionFolder+imagePrefix+"_"+str(img)+".txt");
 		else:
 			[detections, weights] = util.getDetectionsFromTSVFile(detectionFolder+imagePrefix+"_"+str(img)+".txt");
-			detections = conceptnet_util.chooseSingleRepresentativeDetection(allSeedsDictionary, detections);
+			[detections, weights] = conceptnet_util.chooseSingleRepresentativeDetection(allSeedsDictionary, detections, weights);
 		
 		if VERBOSE:
 			print(detections)
@@ -180,7 +180,12 @@ inferenceFolder="intermediateFiles/opt_test/", apiUsed="clarifai"):
 		initialSumOfScores=0;
 		for i in range(len(node_scores)):
 			if i in participants:
-				variables[detectionIndices[i]] = m.addVar(lb=0.49, ub=node_scores[i]+node_scores[i]/2, name=detectionIndices[i]);
+				if apiUsed == "clarifai":
+					variables[detectionIndices[i]] = m.addVar(lb=0.49, ub=node_scores[i]+node_scores[i]/2, \
+						name=detectionIndices[i]);
+				else:
+					variables[detectionIndices[i]] = m.addVar(lb=node_scores[i]/2, ub=node_scores[i]+node_scores[i]/2, \
+						name=detectionIndices[i]);
 			else:
 				variables[detectionIndices[i]] = m.addVar(lb=node_scores[i], ub=node_scores[i], name=detectionIndices[i]);
 			initialSumOfScores += node_scores[i];
@@ -189,7 +194,8 @@ inferenceFolder="intermediateFiles/opt_test/", apiUsed="clarifai"):
 		constraint = LinExpr();
 		for v in variables.keys():
 			constraint += variables[v];
-		m.addConstr(constraint,GRB.GREATER_EQUAL,initialSumOfScores-2);
+
+		m.addConstr(constraint,GRB.GREATER_EQUAL,max(initialSumOfScores-2,0));
 		m.addConstr(constraint,GRB.LESS_EQUAL,initialSumOfScores+2);
 		## Create the Objective
 		objective = LinExpr();

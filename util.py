@@ -17,7 +17,10 @@ def processAllArgumentsReturnVariables(sysarguments):
 	seedsCentralityFile = argsdict["seedsCentralityfile"];
 	allSeedsDictionary = populateModifiedSeedsAndConcreteScoreDictionary(seedsCentralityFile);
 
-	detectionFolder = argsdict["detectionsFolder"]+"Detection/";
+	if argsdict["api"] == "clarifai":
+		detectionFolder = argsdict["detectionsFolder"]+"Detection/";
+	else:
+		detectionFolder = argsdict["detectionsFolder"]+"DetectionRes/";
 	numberOfPuzzles = int(argsdict["numPuzzles"]);
 	inferenceFolder = argsdict["inferenceFolder"];
 	pipelineStage = argsdict["stage"];
@@ -31,7 +34,11 @@ def processAllArgumentsReturnVariables(sysarguments):
 	if argsdict["par"] == "parallel" and pipelineStage != "all":
 			print("Not Permitted!!! Use parallel only with all stages");
 			sys.exit();
-	sortedFilePrefixList_file = argsdict["detectionsFolder"]+"filelist.txt";		
+	sortedFilePrefixList_file = argsdict["detectionsFolder"]+"filelist.txt";
+	print "Seeds Centrality File: "+seedsCentralityFile;
+	print "Detection Folder:"+detectionFolder;
+	print "Inference Folder:"+inferenceFolder;
+	print str(startPuzzle)+";"+str(endPuzzle)+":"+str(numberOfPuzzles);		
 	return [seedsCentralityFile,allSeedsDictionary,detectionFolder,numberOfPuzzles,inferenceFolder,\
 	pipelineStage,API_USED,startPuzzle,endPuzzle,sortedFilePrefixList_file,argsdict];
 
@@ -76,7 +83,7 @@ def getDetectionsFromTSVFile(fileName):
 	detections=[];
 	weights=[];
 	with open(fileName, 'r') as myfile:
-		for lines in myfile:
+		for line in myfile:
 			tokens = line.split("\t");
 			weights.append(tokens[0]);
 			detections.append(tokens[1]);
@@ -164,6 +171,16 @@ WORD2VEC_SIMILARITY_WEIGHT=4.0;
 
 PER_IMAGE_TARGET_LIMIT_PSL_TWO = 200;
 SUM_CONFIDENCE_LIMIT_PSL_TWO = 2;
+
+R_CHOICE =(0.8,2,0.2,2,1,1);#pc1_r
+CHOICE = (0.9,1,0.4,2,1,4);#paramChoice1
+#CHOICE = (0.8,1,0.8,2,1,4);#paramChoice2
+#CHOICE = (0.9,2,0.7,2,1,1);#paramChoice3
+#(0.9,2,0.3,2,1,1);#paramChoice4
+#(0.8,1,0.4,1,1,4);#paramChoice5
+#(0.9,1,0.4,1,1,4);#paramChoice6
+#(0.9,2,0.3,1,3,4);#paramChoice7
+#(0.9,2,0.3,3,3,4);#paramChoice8
 
 if __name__ == "__main__":	
 	SIMILARITY_THRESHOLD_WORDWEIGHTS = 0.8; ## if exceeds similarity, put an edge.

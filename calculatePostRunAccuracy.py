@@ -29,6 +29,7 @@ def calculateMaxAccuracy(expectedWord, finalReorderedTargetsFileName, limitSugge
 	if "-" in expectedWord:
 		expectedWord=expectedWord[:expectedWord.index("-")];
 	maxSimilarity = 0.0;
+	similarWord = None;
 	with open(finalReorderedTargetsFileName, 'r') as f:
 		i=0;
 		for line in f:
@@ -38,17 +39,37 @@ def calculateMaxAccuracy(expectedWord, finalReorderedTargetsFileName, limitSugge
 			similarity = conceptnet_util.getWord2VecSimilarity(expectedWord,tokens[0].strip(),True);
 			if similarity > maxSimilarity:
 				maxSimilarity = similarity;
+				similarWord = tokens[0].strip();
 			i=i+1;
-	return maxSimilarity;
+	return [maxSimilarity,similarWord];
+
+def updateHistogram(histogram, sim):
+	if sim < 0.6:
+		histogram[0] = histogram[0]+1;
+	elif sim <0.7:
+		histogram[1] = histogram[1]+1;
+	elif sim <0.8:
+		histogram[2] = histogram[2]+1;
+	elif sim <0.9:
+		histogram[3] = histogram[3]+1;
+	else:
+		histogram[4] = histogram[4]+1;
+
 
 if __name__ == "__main__":
 	cleanup = False
 	inferenceFolder = sys.argv[1];
 	calculateMax = False;
+	summaryFileW = None;
 	if sys.argv[2] == "max":
 		calculateMax = True;
-	if len(sys.argv) > 3 and sys.argv[3] == "del":
+	if len(sys.argv) > 3:
+		summaryFileW = open(sys.argv[3],'w');	
+	if len(sys.argv) > 4 and sys.argv[4] == "del":
 		cleanup = True;
+	# Less than 0.6, < 0.7, < 0.8, <0.9, <1;	
+	histogram =[0,0,0,0,0];
+
 
 	for root, directories, filenames in os.walk(inferenceFolder):
 		totalSim = 0;
@@ -59,12 +80,27 @@ if __name__ == "__main__":
 				expectedWord = filename[4:].replace("_inf_all.txt","");
 				print expectedWord;
 				if calculateMax:
-					sim = calculateMaxAccuracy(expectedWord, filePath, 20);
+					[sim,similarWord] = calculateMaxAccuracy(expectedWord, filePath, 20);
+					if summaryFileW != None:
+						if similarWord == None:
+							summaryFileW.write(expectedWord+"\tNONE\t"+str(sim)+"\n");
+						else:
+							summaryFileW.write(expectedWord+"\t"+similarWord+"\t"+str(sim)+"\n");
 				else:
 					sim = calculateAverageAccuracy(expectedWord, filePath, 10);	
 				totalSim = sim+totalSim;
 				totalDetected = totalDetected+1;
+				updateHistogram(histogram, sim);
 			elif cleanup:
 				os.remove(filePath);
 		string = str(totalDetected)+","+str(totalSim);
 		print string;
+		stats = "< 0.6:"+str(histogram[0])+",0.6--0.7:"+str(histogram[1])+",0.7--0.8:"+str(histogram[2])+\
+		",0.8--0.9:"+str(histogram[3])+",0.9--1.0:"+str(histogram[4]);
+		print stats;
+		histogram = map(lambda x: float(x)/totalDetected, histogram);
+		stats = "< 0.6:"+str(histogram[0])+",0.6--0.7:"+str(histogram[1])+",0.7--0.8:"+str(histogram[2])+\
+		",0.8--0.9:"+str(histogram[3])+",0.9--1.0:"+str(histogram[4]);
+		print stats;
+	if summaryFileW != None:	
+		summaryFileW.close();

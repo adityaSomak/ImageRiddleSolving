@@ -8,8 +8,9 @@ import math
 import numpy as np
 import time
 
-from concurrent.futures import ThreadPoolExecutor
+#from concurrent.futures import ThreadPoolExecutor
 import threading
+from joblib import Parallel, delayed
 
 #######################################################################
 ########		PIPELINE STAGE II(preprocessing)
@@ -272,6 +273,30 @@ def processAllSeedsFile(seedsFile,assocSpace,visualRelations):
 			if i>=500:
 				break;
 
+'''
+	####################################################################
+				***ThreadPoolExecutor version*** 
+	Start: Process and predict similar words for all seeds from
+	a file. 
+	Assumption is: file-format - <bias-score> <cnet-term> <original-term>
+	####################################################################
+'''
+def processSingleSeed(lines,assocSpace,visualRelations,lineNum):
+	threads=[];
+	i=0;
+	#partNumber = int(sys.argv[4]);
+	line = lines[lineNum];
+	tokens = line.split("\t");
+	seedWord = tokens[2].strip();
+	outputFileName = "intermediateFiles/opt/test/"+seedWord+"_targets_.txt";
+	if os.path.isfile(outputFileName):
+		num_lines = sum(1 for line in open(outputFileName));
+		if num_lines == 7999:
+			print(str(i)," ignored as computation is complete...");
+			return;	
+	#FINDER = FINDERs[lineNum%8];
+	FINDER = AssertionFinder();
+	processTargetsForSingleTerm(FINDER,seedWord,assocSpace,visualRelations,i);
 
 
 '''
@@ -315,7 +340,7 @@ def processAllSeedsFileThreadPool(seedsFile,assocSpace,visualRelations):
 ########################################################################
 np.seterr(divide='ignore', invalid='ignore');
 if 	len(sys.argv) < 3:
-	print("python suggestTargets.py <word> <numberofSimilarTerms> <threads> <part>");
+	print("python suggestTargets.py <word> <numberofSimilarTerms> <threads> <part/X>");
 	print("python suggestTargets.py <word1> <word2> <anynumber>");
 	sys.exit();
 
@@ -325,7 +350,20 @@ visualRelations=["PartOf","MemberOf","HasA","HasProperty"];
 if len(sys.argv) == 5:
 	if sys.argv[1].endswith(".txt"):
 		#processAllSeedsFile(sys.argv[1],assocSpace,visualRelations);
-		processAllSeedsFileThreadPool(sys.argv[1],assocSpace,visualRelations);
+		#processAllSeedsFileThreadPool(sys.argv[1],assocSpace,visualRelations);
+		lines =[];
+		with open(sys.argv[1], "r") as f:
+			for line in f:
+				if line.startswith("##"):
+					continue;
+				lines.append(line);
+
+		#FINDERs=[];
+		#for i in range(8):
+		#	FINDERs.append(AssertionFinder());
+		#print("ConceptNet pool is created");
+		Parallel(n_jobs=8)(delayed(processSingleSeed)(lines, assocSpace,visualRelations, lineNum) \
+			for lineNum in range(len(lines)));
 	else:
 		FINDER = AssertionFinder();
 		processTargetsForSingleTerm(FINDER,sys.argv[1],assocSpace,visualRelations);

@@ -27,7 +27,8 @@ def calculateScalarProjection(queryVector, ontoVector):
 	##############################################################
 '''	
 def mergeTargetsFromDetectedSeeds(reweightedSeedsFileImg, allSeedsMapFile, alpha1=1,alpha2=0.01, targetsPerSeed=3000):
-	ALL_TARGETS_DIRECTORY ="intermediateFiles/allTargets/test1/";
+	#ALL_TARGETS_DIRECTORY ="intermediateFiles/allTargets/test1/";
+	ALL_TARGETS_DIRECTORY ="intermediateFiles/allTargets/test_res/";
 	# read the seed to seed_in_CNet mapping
 	# detected_seed -> centrality_score, seed_in_conceptnet, amtconcScore
 	allSeedsDictionary = util.populateModifiedSeedsAndConcreteScoreDictionary(allSeedsMapFile);

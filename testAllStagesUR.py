@@ -41,9 +41,12 @@ def normalizeSeedsAndWeights(allSeedsDictionary,detectionFolder,prefix,\
 	if apiUsed == "clarifai":
 		[detections,weights] = util.processClarifaiJsonFile(detectionFolder+prefix+"_"+str(imageNum)+".txt");
 	else:
-		[detections,weights] = util.getDetectionsFromTSVFile(detectionFolder+imagePrefix+"_"+str(img)+".txt");
-		detections = conceptnet_util.chooseSingleRepresentativeDetection(allSeedsDictionary, detections);
+		[detections,weights] = util.getDetectionsFromTSVFile(detectionFolder+prefix+"_"+str(imageNum)+".txt");
+		[detections, weights] = conceptnet_util.chooseSingleRepresentativeDetection(allSeedsDictionary, detections, weights);
 
+	if len(detections) == 0:
+		return None;
+	print(detections);
 	sumTotal = 0;
 	seeds = [];
 	newWeights =[];
@@ -70,10 +73,18 @@ def solveIndividualRiddles(detectionFolder,prefix,allSeedsDictionary,inferenceFo
 	reweightedSeedsFileName = normalizeSeedsAndWeights(allSeedsDictionary,\
 	detectionFolder,prefix,int(imageNum),inferenceFolder,API_USED);
 	print("\treweighting seeds completed..");
+	if reweightedSeedsFileName == None:
+		if pipelineStage == "clarifai":
+			return [None, None];
+		elif pipelineStage == "merge":
+			return [None,None, None];
+		else:
+			return None;
 	if pipelineStage == "clarifai":
 		## Note: We will not do parallel processing for this
 		centroid = conceptnet_util.calculateWord2vecCentroidAndHighestAcc(allSeedsDictionary,reweightedSeedsFileName);
 		return [centroid,reweightedSeedsFileName];
+
 
 	#### Step 1: Merge targets from different seeds.
 	mergeTargets.VERBOSE= False;
@@ -103,13 +114,6 @@ def solveIndividualRiddles(detectionFolder,prefix,allSeedsDictionary,inferenceFo
 	sumIndividualAccuracy = sumIndividualAccuracy+acc;
 	return sumIndividualAccuracy;
 	
-choice = (0.9,1,0.4,2,1,4);#paramChoice1
-#choice = (0.9,2,0.7,2,1,1);#paramChoice2
-#(0.9,2,0.3,2,1,1);#paramChoice3
-#(0.8,1,0.4,1,1,4);#paramChoice4
-#(0.9,1,0.4,1,1,4);#paramChoice5
-#(0.9,2,0.3,1,3,4);#paramChoice6
-#(0.9,2,0.3,3,3,4);#paramChoice7
 
 #if len(sys.argv) < 4:
 #	print("python ",sys.argv[0]," <seedsCentralityfile> <detectionsFolder> <number-of-puzzles> \
@@ -119,21 +123,28 @@ choice = (0.9,1,0.4,2,1,4);#paramChoice1
 
 [seedsCentralityFile,allSeedsDictionary,detectionFolder,numberOfPuzzles,inferenceFolder,\
 	pipelineStage,API_USED,startPuzzle,endPuzzle,sortedFilePrefixList_file,argsdict] = \
-	util.processAllArgumentsReturnVariables(sys.argv[1:]);
+	util.processAllArgumentsReturnVariables(sys.argv[1:]);	
+
+accuracyResultsFolderprefix = "accuracyResults/UR/";
+if API_USED != "clarifai":
+	accuracyResultsFolderprefix = "accuracyResults/resnet/UR/";
+	choice = util.R_CHOICE;
+else:
+	choice = util.CHOICE;
 
 if startPuzzle != -1:
-	accuracyFile = open('accuracyResults/UR/accuracyFile_all_puzzles_'+str(pipelineStage)+'_'+\
+	accuracyFile = open(accuracyResultsFolderprefix+'accuracyFile_all_puzzles_'+str(pipelineStage)+'_'+\
 		str(startPuzzle)+'_ur.txt','w');
 else:
-	accuracyFile = open('accuracyResults/UR/accuracyFile_all_puzzles_'+str(pipelineStage)+'_ur.txt','w');
+	accuracyFile = open(accuracyResultsFolderprefix+'accuracyFile_all_puzzles_'+str(pipelineStage)+'_ur.txt','w');
 
 startTime = time.time();
 #for choice in parameterSpace:
 if startPuzzle != -1:
-	puzzleAccuracyFile = open('accuracyResults/UR/accuracyFile_all_images_'+str(pipelineStage)+'_'+\
+	puzzleAccuracyFile = open(accuracyResultsFolderprefix+'accuracyFile_all_images_'+str(pipelineStage)+'_'+\
 		str(startPuzzle)+'_'+str(endPuzzle)+'_ur.txt','w');
 else:
-	puzzleAccuracyFile = open('accuracyResults/UR/accuracyFile_all_images_'+str(pipelineStage)+'_ur.txt','w');
+	puzzleAccuracyFile = open(accuracyResultsFolderprefix+'accuracyFile_all_images_'+str(pipelineStage)+'_ur.txt','w');
 util.setParameters(choice[0],choice[1],choice[2],choice[3],choice[4],choice[5]);
 
 sumIndividualAccuracy = 0;
@@ -183,15 +194,23 @@ with open(sortedFilePrefixList_file, 'r') as myfile:
 			centroids =[];
 			reweightedSeedsFiles =[];
 			mergeStageDSTuples =[];
+			incomplete = False;
 			for imageNum in range(1,5):
 				if pipelineStage == "all":
-					sumAccuracy = sumAccuracy+ solveIndividualRiddles(detectionFolder,prefix,\
+					indivAcc = solveIndividualRiddles(detectionFolder,prefix,\
 						allSeedsDictionary, inferenceFolder, seedsCentralityFile, pipelineStage,\
 						imageNum,API_USED);
+					if indivAcc == None:
+						incomplete = True;
+						break;
+					sumAccuracy = sumAccuracy + indivAcc;
 				elif pipelineStage == "clarifai":
 					[centroid, reweightedSeedsFileName] = solveIndividualRiddles(detectionFolder,prefix,\
 						allSeedsDictionary, inferenceFolder, seedsCentralityFile, pipelineStage, imageNum,\
 						API_USED);
+					if reweightedSeedsFileName == None:
+						incomplete = True;
+						break;
 					#sumAccuracy = sumAccuracy+acc;
 					centroids.append(centroid);
 					reweightedSeedsFiles.append(reweightedSeedsFileName);
@@ -199,9 +218,16 @@ with open(sortedFilePrefixList_file, 'r') as myfile:
 					[sortedScoreAndIndexList, targetWordsList, targetWordsDictonary] = solveIndividualRiddles(\
 						detectionFolder,prefix,allSeedsDictionary, inferenceFolder, \
 						seedsCentralityFile, pipelineStage, imageNum,API_USED);
+					if sortedScoreAndIndexList == None:
+						incomplete = True;
+						break;
 					mergeStageDSTuples.append((sortedScoreAndIndexList, targetWordsList, targetWordsDictonary));
 				sumIndividualAccuracy= sumAccuracy+sumIndividualAccuracy;
 			
+		if incomplete:
+			i=i+1;
+			continue;
+
 		if pipelineStage == "all":
 			pslTwo.VERBOSE= False;
 			finalTargetsFileName = pslTwo.callPSLModelTwo(allSeedsDictionary,inferenceFolder,prefix);

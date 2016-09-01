@@ -49,20 +49,24 @@ def orderMergedTargetsAccordingToCentroid(mergeStageDSTuples, allSeedsDictionary
 Special heuristic for choosing a single detection from the comma-separated list
 that the DeepResNet provides. 
 '''
-def chooseSingleRepresentativeDetection(allSeedsDictionary, detections):
+def chooseSingleRepresentativeDetection(allSeedsDictionary, detections, weights):
 	finalDetections = [];
+	finalWeights = [];
+	i=0;
 	for detectionArr in detections:
 		individualDetections = detectionArr.split(",");
 		for detection in individualDetections:
 			cNetSeed = None;
 			try:
-				cNetSeed = allSeedsDictionary[detection.strip()];
+				cNetSeed = allSeedsDictionary[detection.strip().lower()][1];
 			except KeyError, e:
 				pass;
 			if cNetSeed != None:
 				finalDetections.append(cNetSeed);
+				finalWeights.append(weights[i]);
 				break;
-	return finalDetections;
+		i=i+1;
+	return [finalDetections, finalWeights];
 	
 #%%%%%%%%
 ## Take the mean of the means for all images.

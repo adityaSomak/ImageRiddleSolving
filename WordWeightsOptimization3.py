@@ -31,7 +31,7 @@ def getSeedVector(allSeedsDictionary, seed, seed_detections_vector):
 		try:
 			word_cnet = allSeedsDictionary[word][1];
 			vector.append(conceptnet_util.getSimilarity(seed_cnet, word_cnet, True));
-		except KeyError as ke:
+		except Exception:
 			vector.append(0);
 	return vector
 
@@ -42,6 +42,8 @@ def getAverageSimilarity(allSeedsDictionary,seed, img_i, weights_all_images,dete
 		if img_j != img_i:
 			image_J_vector = np.array(weights_all_images[img_j]);
 			seedVector = getSeedVector(allSeedsDictionary, seed, detection_all_images[img_j]);
+			#print(seedVector);
+			#print(image_J_vector);
 			seedNorm = LA.norm(seedVector);
 			if seedNorm > 0:
 				cosineSim = np.dot(image_J_vector,seedVector)/(seedNorm*norms_images[img_j]);
@@ -65,7 +67,7 @@ inferenceFolder="intermediateFiles/opt_test/",apiUsed="clarifai"):
 			[detections, weights] = util.processClarifaiJsonFile(detectionFolder+imagePrefix+"_"+str(img)+".txt");
 		else:
 			[detections, weights] = util.getDetectionsFromTSVFile(detectionFolder+imagePrefix+"_"+str(img)+".txt");
-			detections = conceptnet_util.chooseSingleRepresentativeDetection(allSeedsDictionary, detections);
+			[detections, weights] = conceptnet_util.chooseSingleRepresentativeDetection(allSeedsDictionary, detections, weights);
 
 		weights = map(lambda x: float(x),weights);
 		detections = map(lambda x: x.strip(),detections);
@@ -76,6 +78,7 @@ inferenceFolder="intermediateFiles/opt_test/",apiUsed="clarifai"):
 	for img_i in range(1,5):
 		detections_i = detection_all_images[img_i];
 		detectionAndSimilarity=[];
+		#print(detections_i);
 		for seed in detections_i:
 			avgSimilarity = getAverageSimilarity(allSeedsDictionary,seed, img_i, weights_all_images,\
 			detection_all_images,norms_images);
