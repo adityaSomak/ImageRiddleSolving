@@ -35,17 +35,34 @@ Sort Suggested Targets:
 ./sortSuggestedTargets.sh intermediateFiles/allTargets/test1
 
 
-Run IUR:
---------
-python testAccuracyIUR.py intermediateFiles/lemmatizedSeedsCentralized_all3k.txt ../First250riddles/riddlesDetectionAll/ 
-3333 intermediateFiles/output3k/ > tempOp_overall.txt 2> err_ov.txt &
-
 Run GUR:
 --------
-python testAccuracyGUR.py intermediateFiles/lemmatizedSeedsCentralized_all3k.txt ../First250riddles/riddlesDetectionAll/ 
-3333 intermediateFiles/output3k/ > tempOp_overall.txt 2> err_ov.txt &
+# For ResidualNetwork
+python testAllStagesGUR.py intermediateFiles/lemmatizedSeedsCentralizedResNet_3k.txt ../First250riddles/riddlesDetectionAll/ 3333 
+ <outputFolder> resnet -stage all
+ # For Clarifai
+python testAllStagesGUR.py intermediateFiles/lemmatizedSeedsCentralizedResNet_3k.txt ../First250riddles/riddlesDetectionAll/ 3333 
+ <outputFolder> clarifai -stage all
+
+usage: testAllStagesGUR.py [-h] [-stage STAGE] [-from FROM] [-to TO]
+                           [-par PAR]
+                           seedsCentralityfile detectionsFolder numPuzzles
+                           inferenceFolder {clarifai,resnet}
+STAGE: all/merge/clarifai
+
+For running UR/IUR just use testAllStagesUR.py and testAllStagesIUR.py respectively.
 
 
+Calculating Post-Run Accuracy:
+------------------------------
+usage: calculatePostRunAccuracy.py [-h] [-cleanup CLEANUP]
+                                   [-summaryFile SUMMARYFILE]
+                                   [-ignoreDevDataFile IGNOREDEVDATAFILE]
+                                   inferenceFolder maxOrAvg
+                                   
+python calculatePostRunAccuracy.py intermediateFiles/resnet/output_iur_merge_pc1_r/ max -ignoreDevDataFile 
+
+../First250riddles/riddlesDetectionAll/filelist.txt                                   
 ---------------------------------------------------
 Gitlab Commit:
 --------------
