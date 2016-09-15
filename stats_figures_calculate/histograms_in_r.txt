@@ -1,0 +1,31 @@
+ur_all = read.table('accuracyFile_all_images_all_ur.txt',header=FALSE,sep="\t");
+jpeg('ur_all.jpg');hist(ur_all[[3]],main="Accuracy: UR+All",xlab="accuracy",ylab="Frequency",cex.lab=1.5, cex.axis=1.5, cex.main=1.5);dev.off() 
+
+gur_all = read.table('accuracyFile_all_images_all_gur.txt',header=FALSE,sep="\t");
+jpeg('gur_all.jpg');hist(gur_all[[3]],main="Accuracy: GUR+All",xlab="accuracy",ylab="Frequency",cex.lab=1.5, cex.axis=1.5, cex.main=1.5);dev.off()
+
+iur_all = read.table('accuracyFile_all_images_all_iur.txt',header=FALSE,sep="\t");
+jpeg('iur_all.jpg');hist(iur_all[[3]],main="Accuracy: IUR+All",xlab="accuracy",ylab="Frequency",cex.lab=1.5, cex.axis=1.5, cex.main=1.5);dev.off()
+ 
+ur_clarifai = read.table('accuracyFile_all_images_clarifai_ur.txt',header=FALSE,sep="\t");
+jpeg('ur_vb.jpg');hist(ur_clarifai[[3]],main="Accuracy: UR+VB",xlab="accuracy",ylab="Frequency",cex.lab=1.5, cex.axis=1.5, cex.main=1.5);dev.off()
+ 
+gur_clarifai = read.table('accuracyFile_all_images_clarifai_gur.txt',header=FALSE,sep="\t");
+jpeg('gur_vb.jpg');hist(gur_clarifai[[3]],main="Accuracy: GUR+VB",xlab="accuracy",ylab="Frequency",cex.lab=1.5, cex.axis=1.5, cex.main=1.5);dev.off()
+
+iur_clarifai = read.table('accuracyFile_all_images_clarifai_iur.txt',header=FALSE,sep="\t");
+jpeg('iur_vb.jpg');hist(iur_clarifai[[3]],main="Accuracy: IUR+VB",xlab="accuracy",ylab="Frequency",cex.lab=1.5, cex.axis=1.5, cex.main=1.5);dev.off()
+
+ur_rr = read.table('accuracyFile_all_images_merge_ur.txt',header=FALSE,sep="\t");
+jpeg('ur_rr.jpg');hist(ur_rr[[3]],main="Accuracy: UR+RR",xlab="accuracy",ylab="Frequency",cex.lab=1.5, cex.axis=1.5, cex.main=1.5);dev.off()
+
+gur_rr = read.table('accuracyFile_all_images_merge_gur.txt',header=FALSE,sep="\t");
+jpeg('gur_rr.jpg');hist(gur_rr[[3]],main="Accuracy: GUR+RR",xlab="accuracy",ylab="Frequency",cex.lab=1.5, cex.axis=1.5, cex.main=1.5);dev.off()
+
+iur_rr = read.table('accuracyFile_all_images_merge_iur.txt',header=FALSE,sep="\t");
+jpeg('iur_rr.jpg');hist(iur_rr[[3]],main="Accuracy: IUR+RR",xlab="accuracy",ylab="Frequency",cex.lab=1.5, cex.axis=1.5, cex.main=1.5);dev.off()
+
+
+
+ 
+
