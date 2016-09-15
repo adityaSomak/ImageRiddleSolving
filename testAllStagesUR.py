@@ -128,7 +128,7 @@ def solveIndividualRiddles(detectionFolder,prefix,allSeedsDictionary,inferenceFo
 accuracyResultsFolderprefix = "accuracyResults/UR/";
 if API_USED != "clarifai":
 	accuracyResultsFolderprefix = "accuracyResults/resnet/UR/";
-	choice = util.R_CHOICE;
+	choice = (0.9,1,0.4,2,1,4);#util.R_CHOICE;
 else:
 	choice = util.CHOICE;
 
@@ -230,7 +230,7 @@ with open(sortedFilePrefixList_file, 'r') as myfile:
 
 		if pipelineStage == "all":
 			pslTwo.VERBOSE= False;
-			finalTargetsFileName = pslTwo.callPSLModelTwo(allSeedsDictionary,inferenceFolder,prefix);
+			finalTargetsFileName = pslTwo.callPSLModelTwo(allSeedsDictionary,inferenceFolder,prefix,detectionFolder,API_USED);
 		elif pipelineStage == "clarifai":
 			finalTargetsFileName = conceptnet_util.orderWordsAccordingToCentroid(centroids, reweightedSeedsFiles, \
 				allSeedsDictionary, inferenceFolder, prefix);

@@ -211,12 +211,9 @@ inferenceFolder="intermediateFiles/opt_test/", apiUsed="clarifai"):
 			m.addConstr(ruleVariable,GRB.GREATER_EQUAL,2*src_node_var-dest_node_var);
 	
 		m.setObjective(objective);
-		# The objective is to minimize the costs
 		m.modelSense = GRB.MINIMIZE
 
-		# Update model to integrate new variables
 		m.update()
-		### TODO: try using model.tune()
 		m.optimize();
 		#m.write('organizingNetwork.lp');
 		#m.write('organizingNetwork.sol');

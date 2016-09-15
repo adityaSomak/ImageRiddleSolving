@@ -1,6 +1,7 @@
 import conceptnet_util
 import sys
 import os
+import argparse
 
 '''
  This file is called after the IUR/UR/GUR scripts are run and it calculates 
@@ -57,16 +58,34 @@ def updateHistogram(histogram, sim):
 
 
 if __name__ == "__main__":
-	cleanup = False
-	inferenceFolder = sys.argv[1];
+	parser = argparse.ArgumentParser();
+	parser.add_argument("inferenceFolder");
+	parser.add_argument("maxOrAvg");
+	parser.add_argument("-cleanup",action="store",default=False,type=bool);
+	parser.add_argument("-summaryFile",action="store",default=None);
+	parser.add_argument("-ignoreDevDataFile",default=None);
+	argsdict = vars(parser.parse_args(sys.argv[1:]));
+
+	inferenceFolder = argsdict["inferenceFolder"];
+	cleanup = bool(argsdict["cleanup"]);
+
 	calculateMax = False;
-	summaryFileW = None;
-	if sys.argv[2] == "max":
+	if argsdict["maxOrAvg"] == "max":
 		calculateMax = True;
-	if len(sys.argv) > 3:
-		summaryFileW = open(sys.argv[3],'w');	
-	if len(sys.argv) > 4 and sys.argv[4] == "del":
-		cleanup = True;
+	summaryFileW = None;
+	if argsdict["summaryFile"]!= None:
+		summaryFileW = open(argsdict["summaryFile"],'w');
+
+	imagesInDevelopment = set();
+	if argsdict["ignoreDevDataFile"]!= None:
+		i=0;
+		with open(argsdict["ignoreDevDataFile"],'r') as filelist:
+			for line in filelist:
+				imagesInDevelopment.add(line.strip());
+				if i==500:
+					break;
+				i=i+1;
+
 	# Less than 0.6, < 0.7, < 0.8, <0.9, <1;	
 	histogram =[0,0,0,0,0];
 
@@ -79,6 +98,10 @@ if __name__ == "__main__":
 			if filePath.endswith("_inf_all.txt"):
 				expectedWord = filename[4:].replace("_inf_all.txt","");
 				print expectedWord;
+				# Ignore the word if it is used in Dev Set
+				if expectedWord in imagesInDevelopment:
+					continue;
+
 				if calculateMax:
 					[sim,similarWord] = calculateMaxAccuracy(expectedWord, filePath, 20);
 					if summaryFileW != None:

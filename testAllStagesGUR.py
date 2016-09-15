@@ -177,7 +177,7 @@ with open(sortedFilePrefixList_file, 'r') as myfile:
 
 		if pipelineStage == "all":
 			pslTwo.VERBOSE= False;
-			finalTargetsFileName = pslTwo.callPSLModelTwo(allSeedsDictionary,inferenceFolder,prefix);
+			finalTargetsFileName = pslTwo.callPSLModelTwo(allSeedsDictionary,inferenceFolder,prefix,detectionFolder,API_USED);
 		elif pipelineStage == "clarifai":
 			finalTargetsFileName = conceptnet_util.orderWordsAccordingToCentroid(centroids, reweightedSeedsFiles, \
 				allSeedsDictionary, inferenceFolder, prefix);

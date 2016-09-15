@@ -166,9 +166,30 @@ def optimizeAllAndInferConceptsModelTwo(targetsToCentralities,seedsDetected_weig
 		printSolution(m,targets,outputFile,targetsToCentralities);
 		outputFile.close();
 	return outputFile.name;
-	
 
-def callPSLModelTwo(allSeedsDictionary,inferenceFolder,seedPrefix):
+def addTopSeedsAsTargets(targetsToCentralities,detectedSeedsFileName, allSeedsDictionary, apiUsed):
+	if apiUsed == "clarifai":
+		return;
+	[detections,weights] = util.getDetectionsFromTSVFile(detectedSeedsFileName);
+	[detections,weights] = conceptnet_util.chooseSingleRepresentativeDetection(allSeedsDictionary, detections, weights);
+	
+	orderedSeedWordsList = detections;#sorted(detections,key=lambda s:seedsDetected_weights[s],reverse=True);
+	prevWeight = 0.99;
+	i=0;
+	topSeeds=[];
+	for seed in orderedSeedWordsList:
+		if weights[i] >= max(0.01,prevWeight*0.1):
+			topSeeds.append(seed);
+		prevWeight = weights[i];
+		i=i+1;
+		if i==2:
+			break;
+	for seed in topSeeds:
+		seedWithoutIndex = seed[:len(seed)-1];
+		targetsToCentralities[seedWithoutIndex] = conceptnet_util.getCentralityScore(seedWithoutIndex,True);
+		
+
+def callPSLModelTwo(allSeedsDictionary,inferenceFolder,seedPrefix,detectionFolder,apiUsed):
 	seedsDetected_weights={};
 	targetsToCentralities={};
 	for index in range(1,5):
@@ -178,7 +199,9 @@ def callPSLModelTwo(allSeedsDictionary,inferenceFolder,seedPrefix):
 		#print(seedsDetected_weights);
 		
 		sortedTargetsFileName = inferenceFolder+"opt_"+seedPrefix+"_"+str(index)+"_c_inf.txt";
-		loadTargetToCentralities(sortedTargetsFileName, targetsToCentralities)
+		loadTargetToCentralities(sortedTargetsFileName, targetsToCentralities);
+		detectedSeedsFileName = detectionFolder+seedPrefix+"_"+str(index)+".txt";
+		addTopSeedsAsTargets(targetsToCentralities,detectedSeedsFileName,allSeedsDictionary,apiUsed);
 		
 	fileName= optimizeAllAndInferConceptsModelTwo(targetsToCentralities,seedsDetected_weights,\
 	seedPrefix,inferenceFolder+"opt_"+seedPrefix);
