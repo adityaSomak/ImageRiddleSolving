@@ -1,0 +1,4 @@
+python findFiles.py $ARG0 > $OP0
+
+copy the file $OP0 to $ARG0
+copy seeds.sh to $ARG0

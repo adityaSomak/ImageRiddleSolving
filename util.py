@@ -39,6 +39,7 @@ def processAllArgumentsReturnVariables(sysarguments):
 	print "Detection Folder:"+detectionFolder;
 	print "Inference Folder:"+inferenceFolder;
 	print str(startPuzzle)+";"+str(endPuzzle)+":"+str(numberOfPuzzles);		
+	print "File List: " + sortedFilePrefixList_file
 	return [seedsCentralityFile,allSeedsDictionary,detectionFolder,numberOfPuzzles,inferenceFolder,\
 	pipelineStage,API_USED,startPuzzle,endPuzzle,sortedFilePrefixList_file,argsdict];
 

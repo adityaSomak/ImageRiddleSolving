@@ -22,7 +22,7 @@ def orderMergedTargetsAccordingToCentroid(mergeStageDSTuples, allSeedsDictionary
 		sortedScoreAndIndexList= mergeDS[0];
 		targetWordsList= mergeDS[1];
 		targetWordsDictonary = mergeDS[2];
-		for indexTarget in range(50):
+		for indexTarget in range(20):
 			indexAndScore = sortedScoreAndIndexList[indexTarget];
 			targetWord = targetWordsList[indexAndScore[0]];
 			words.add(targetWord);
