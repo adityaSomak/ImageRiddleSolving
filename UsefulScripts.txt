@@ -1,0 +1,1 @@
+less modifiedTargetsCentralities.txt | awk '{print $1*$1"\t"$0}' > modifiedTargetsCentralitiesSq.txt

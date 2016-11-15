@@ -1,0 +1,10 @@
+CREATE CONSTRAINT ON (e:Entity) ASSERT e.name IS UNIQUE;
+
+USING PERIODIC COMMIT 5000
+LOAD CSV  FROM 'file:///windows/drive2/For%20PhD/KR%20Lab/UMD_vision_integration/Image_Riddle/conceptnet5/data/flat_csv_data/assertions/part_00.csv' as line FIELDTERMINATOR '\t' 
+with line
+MERGE (entity1:Entity {name: line[2]})
+MERGE (entity2:Entity {name: line[3]})
+
+CREATE (entity1)-[r:REL]->(entity2)
+SET r.weight = line[5], r.name=line[1];

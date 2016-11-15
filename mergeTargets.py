@@ -14,7 +14,6 @@ def calculateScalarProjection(queryVector, ontoVector):
 	return np.dot(queryVector,ontoVector)/LA.norm(ontoVector);
 	
 	
-	
 '''
 	##############################################################
 	ASSUMPTION: For each seed, all the files exist and they are all 
@@ -28,7 +27,7 @@ def calculateScalarProjection(queryVector, ontoVector):
 '''	
 def mergeTargetsFromDetectedSeeds(reweightedSeedsFileImg, allSeedsMapFile, alpha1=1,alpha2=0.01, targetsPerSeed=3000):
 	#ALL_TARGETS_DIRECTORY ="intermediateFiles/allTargets/test1/";
-	ALL_TARGETS_DIRECTORY ="intermediateFiles/allTargets/test_res/";
+	ALL_TARGETS_DIRECTORY ="../OUTPUT_DATA/intermediateFiles/allTargets/test_res/";
 	# read the seed to seed_in_CNet mapping
 	# detected_seed -> centrality_score, seed_in_conceptnet, amtconcScore
 	allSeedsDictionary = util.populateModifiedSeedsAndConcreteScoreDictionary(allSeedsMapFile);
@@ -166,7 +165,7 @@ if __name__ == "__main__":
 	# sys.argv[3] = targets for each seed
 	
 	VERBOSE= True;
-	ALL_TARGETS_DIRECTORY ="intermediateFiles/allTargets/test1/";
+	ALL_TARGETS_DIRECTORY ="../OUTPUT_DATA/intermediateFiles/allTargets/test1/";
 	[sortedScoreAndIndexList, targetWordsList, targetWordsDictionary,seedsDetected_weights,seedWordsList,allSeedsDictionary] = \
 	mergeTargetsFromDetectedSeeds(sys.argv[1],sys.argv[2],1,0.01);
 	
