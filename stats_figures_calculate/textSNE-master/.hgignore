@@ -1,0 +1,12 @@
+syntax: glob
+
+*~
+*.dat
+*.o
+*.orig
+*.png
+*.pyc
+*.pyo
+*.so
+*.sw?
+3rd-party/t-SNE_files/tSNE_linux

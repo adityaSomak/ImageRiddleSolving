@@ -83,10 +83,13 @@ def solveIndividualRiddles(detectionFolder,prefix,allSeedsDictionary,inferenceFo
 	pipelineStage,API_USED,startPuzzle,endPuzzle,sortedFilePrefixList_file,argsdict] = \
 	util.processAllArgumentsReturnVariables(sys.argv[1:]);
 
-accuracyResultsFolderprefix = "accuracyResults/GUR/";
+accuracyResultsFolderprefix = "../OUTPUT_DATA/accuracyResults/GUR/";
 if API_USED != "clarifai":
-	accuracyResultsFolderprefix = "accuracyResults/resnet/GUR/";
+	accuracyResultsFolderprefix = "../OUTPUT_DATA/accuracyResults/resnet/GUR/";
 	choice = util.R_CHOICE;
+elif API_USED == "vqa":
+	accuracyResultsFolderprefix = "../OUTPUT_DATA/accuracyResults/vqa/GUR/";
+	choice = util.R_CHOICE
 else:
 	choice = util.CHOICE;
 

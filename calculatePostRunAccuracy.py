@@ -1,4 +1,5 @@
-import conceptnet_util
+#import conceptnet_util
+import SimilarityUtil
 import sys
 import os
 import argparse
@@ -44,6 +45,29 @@ def calculateMaxAccuracy(expectedWord, finalReorderedTargetsFileName, limitSugge
 			i=i+1;
 	return [maxSimilarity,similarWord];
 
+def calculateMaxWordnetAccuracy(expectedWord, finalReorderedTargetsFileName, limitSuggestions=10):
+	if "-" in expectedWord:
+		expectedWord=expectedWord[:expectedWord.index("-")];
+	maxSimilarity = 0.0;
+	similarWord = None;
+	with open(finalReorderedTargetsFileName, 'r') as f:
+		i=0;
+		for line in f:
+			tokens =line.split("\t");
+			if i==limitSuggestions:
+				break;
+			words = tokens[0].strip().split("_")
+			avg_sim = 0
+			for word in words:
+				similarity = SimilarityUtil.word_similarity(expectedWord,word);
+				avg_sim += similarity
+			avg_sim = avg_sim/float(len(words))
+			if avg_sim > maxSimilarity:
+				maxSimilarity = avg_sim
+				similarWord = tokens[0].strip()
+			i=i+1;
+	return [maxSimilarity,similarWord];
+
 def updateHistogram(histogram, sim):
 	if sim < 0.6:
 		histogram[0] = histogram[0]+1;
@@ -64,6 +88,7 @@ if __name__ == "__main__":
 	parser.add_argument("-cleanup",action="store",default=False,type=bool);
 	parser.add_argument("-summaryFile",action="store",default=None);
 	parser.add_argument("-ignoreDevDataFile",default=None);
+	parser.add_argument("-useK",default=20,type=int)      
 	argsdict = vars(parser.parse_args(sys.argv[1:]));
 
 	inferenceFolder = argsdict["inferenceFolder"];
@@ -89,35 +114,46 @@ if __name__ == "__main__":
 	# Less than 0.6, < 0.7, < 0.8, <0.9, <1;	
 	histogram =[0,0,0,0,0];
 
-
+	
 	for root, directories, filenames in os.walk(inferenceFolder):
 		totalSim = 0;
 		totalDetected=0;
+		totalSim_at1 = 0
 		for filename in filenames:
 			filePath = str(os.path.join(root,filename));
 			if filePath.endswith("_inf_all.txt"):
 				expectedWord = filename[4:].replace("_inf_all.txt","");
-				print expectedWord;
+				# print expectedWord;
 				# Ignore the word if it is used in Dev Set
 				if expectedWord in imagesInDevelopment:
 					continue;
 
 				if calculateMax:
-					[sim,similarWord] = calculateMaxAccuracy(expectedWord, filePath, 20);
-					if summaryFileW != None:
-						if similarWord == None:
-							summaryFileW.write(expectedWord+"\tNONE\t"+str(sim)+"\n");
-						else:
-							summaryFileW.write(expectedWord+"\t"+similarWord+"\t"+str(sim)+"\n");
+					# [sim,similarWord] = calculateMaxAccuracy(expectedWord, filePath, 20);
+					try:
+						[sim_at_1,_] = calculateMaxWordnetAccuracy(expectedWord, filePath, 1)
+						[sim,similarWord] = calculateMaxWordnetAccuracy(expectedWord, filePath, argsdict["useK"]) #20)
+						if summaryFileW != None:
+							if similarWord == None:
+								summaryFileW.write(expectedWord+"\tNONE\t"+str(sim)+"\n");
+							else:
+								summaryFileW.write(expectedWord+"\t"+similarWord+"\t"+str(sim)+"\n");
+					except Exception:
+						sim = 0
+						sim_at_1 = 0
+						totalDetected -= 1
 				else:
 					sim = calculateAverageAccuracy(expectedWord, filePath, 10);	
 				totalSim = sim+totalSim;
+				totalSim_at1 += sim_at_1
 				totalDetected = totalDetected+1;
 				updateHistogram(histogram, sim);
+				print "GT: %s, Pred: %s: (%f) " % (expectedWord, similarWord, sim)
 			elif cleanup:
 				os.remove(filePath);
 		string = str(totalDetected)+","+str(totalSim);
-		print string;
+		print "Examples: %d, Total: %f, Avg: %f" % (totalDetected, totalSim, (totalSim/float(totalDetected)));
+		print "Avg sim @1: %f" % (totalSim_at1/float(totalDetected))
 		stats = "< 0.6:"+str(histogram[0])+",0.6--0.7:"+str(histogram[1])+",0.7--0.8:"+str(histogram[2])+\
 		",0.8--0.9:"+str(histogram[3])+",0.9--1.0:"+str(histogram[4]);
 		print stats;

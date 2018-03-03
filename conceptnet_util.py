@@ -73,27 +73,41 @@ def chooseSingleRepresentativeDetection(allSeedsDictionary, detections, weights)
 ## Get the most similar words from word2vec model to this mean.
 ## Write down these words in a file.
 #%%%%%%%%
-def orderWordsAccordingToCentroid(centroids, reweightedSeedsFiles, allSeedsDictionary, inferenceFolder, seedPrefix):
+def orderWordsAccordingToCentroid(centroids, reweightedSeedsFiles, allSeedsDictionary, inferenceFolder, seedPrefix, vocab=None):
 	meanVector = np.mean(centroids,axis=0);
-	tuples = word2vec_model.similar_by_vector(meanVector,topn=25);
-	outputFile = open(inferenceFolder+"opt_"+seedPrefix+"_inf_all.txt","w");
-	for tup in tuples:
-		try:
-			word = tup[0].encode('utf-8');
-			if word.replace("_","").isalnum():
-				print('%s\t%g\t%g' % (word, tup[1], allSeedsDictionary[word][2]),file=outputFile);
-		except KeyError:
-			if word.replace("_","").isalnum():
-				print('%s\t%g\t' % (word, tup[1]),file=outputFile);
-		except UnicodeDecodeError:
-			pass
-	outputFile.close();
+	if vocab is not None:
+		tuples = []
+		for word in vocab:
+			dist = scipy.spatial.distance.cosine(meanVector,vocab[word]);
+			tuples.append((dist,word));
+		tuples = sorted(tuples,key=lambda x:abs(x[0]));
+		outputFile = open(inferenceFolder+"opt_"+seedPrefix+"_inf_all.txt","w");
+		for tup in tuples:
+			try:
+				print('%s\t%g\t%g' % (tup[1], tup[0], allSeedsDictionary[tup[1]][2]),file=outputFile);
+			except KeyError:
+				print('%s\t%g' % (tup[1], tup[0]),file=outputFile);
+		outputFile.close();
+	else:
+		tuples = word2vec_model.similar_by_vector(meanVector,topn=25);
+		outputFile = open(inferenceFolder+"opt_"+seedPrefix+"_inf_all.txt","w");
+		for tup in tuples:
+			try:
+				word = tup[0].encode('utf-8');
+				if word.replace("_","").isalnum():
+					print('%s\t%g\t%g' % (word, tup[1], allSeedsDictionary[word][2]),file=outputFile);
+			except KeyError:
+				if word.replace("_","").isalnum():
+					print('%s\t%g\t' % (word, tup[1]),file=outputFile);
+			except UnicodeDecodeError:
+				pass
+		outputFile.close();
 	return outputFile.name;
 
 #%%%%%%%%
 ## Get word2vec vectors for Seeds. Calculate weighted mean.
 #%%%%%%%%
-def calculateWord2vecCentroidAndHighestAcc(allSeedsDictionary, reweightedSeedsFileName):
+def calculateWord2vecCentroidAndHighestAcc(allSeedsDictionary, reweightedSeedsFileName, vocab=None):
 	# read the weights and seed_in_CNet
 	seedsDetected_weights = util.readReweightedSeeds(reweightedSeedsFileName,allSeedsDictionary,False);
 	seedWordsList = list(seedsDetected_weights.keys());
@@ -102,6 +116,8 @@ def calculateWord2vecCentroidAndHighestAcc(allSeedsDictionary, reweightedSeedsFi
 		seedWord = seedWordsList[indexSeed];
 		weight = seedsDetected_weights[seedWord];
 		seedVector = getWord2VecVector(seedWord);
+		if vocab is not None:
+			vocab[seedWord] = seedVector
 		if indexSeed == 0:
 			meanVector = seedVector*weight;
 		else:

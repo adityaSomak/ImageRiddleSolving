@@ -66,7 +66,7 @@ def normalizeSeedsAndWeights(allSeedsDictionary,detectionFolder,prefix,\
 	return outputFile.name;
 
 def solveIndividualRiddles(detectionFolder,prefix,allSeedsDictionary,inferenceFolder,seedsCentralityFile,
-	pipelineStage, imageNum, API_USED):
+	pipelineStage, imageNum, API_USED, vocab=None):
 	sumIndividualAccuracy = 0;
 	trainingImage = detectionFolder+prefix+"_"+str(imageNum)+".txt";
 	WordWeightsOptimization2.VERBOSE = False;
@@ -82,7 +82,7 @@ def solveIndividualRiddles(detectionFolder,prefix,allSeedsDictionary,inferenceFo
 			return None;
 	if pipelineStage == "clarifai":
 		## Note: We will not do parallel processing for this
-		centroid = conceptnet_util.calculateWord2vecCentroidAndHighestAcc(allSeedsDictionary,reweightedSeedsFileName);
+		centroid = conceptnet_util.calculateWord2vecCentroidAndHighestAcc(allSeedsDictionary,reweightedSeedsFileName, vocab);
 		return [centroid,reweightedSeedsFileName];
 
 
@@ -125,9 +125,12 @@ def solveIndividualRiddles(detectionFolder,prefix,allSeedsDictionary,inferenceFo
 	pipelineStage,API_USED,startPuzzle,endPuzzle,sortedFilePrefixList_file,argsdict] = \
 	util.processAllArgumentsReturnVariables(sys.argv[1:]);	
 
-accuracyResultsFolderprefix = "accuracyResults/UR/";
-if API_USED != "clarifai":
-	accuracyResultsFolderprefix = "accuracyResults/resnet/UR/";
+accuracyResultsFolderprefix = "../OUTPUT_DATA/accuracyResults/UR/";
+if API_USED == "resnet":
+	accuracyResultsFolderprefix = "../OUTPUT_DATA/accuracyResults/resnet/UR/";
+	choice = (0.9,1,0.4,2,1,4);#util.R_CHOICE;
+elif API_USED == "vqa":
+	accuracyResultsFolderprefix = "../OUTPUT_DATA/accuracyResults/vqa/UR/";
 	choice = (0.9,1,0.4,2,1,4);#util.R_CHOICE;
 else:
 	choice = util.CHOICE;
@@ -192,6 +195,7 @@ with open(sortedFilePrefixList_file, 'r') as myfile:
 				sumIndividualAccuracy=acc+sumIndividualAccuracy;
 		else:
 			centroids =[];
+			vocab = {}
 			reweightedSeedsFiles =[];
 			mergeStageDSTuples =[];
 			incomplete = False;
@@ -207,7 +211,7 @@ with open(sortedFilePrefixList_file, 'r') as myfile:
 				elif pipelineStage == "clarifai":
 					[centroid, reweightedSeedsFileName] = solveIndividualRiddles(detectionFolder,prefix,\
 						allSeedsDictionary, inferenceFolder, seedsCentralityFile, pipelineStage, imageNum,\
-						API_USED);
+						API_USED, vocab);
 					if reweightedSeedsFileName == None:
 						incomplete = True;
 						break;
@@ -233,7 +237,7 @@ with open(sortedFilePrefixList_file, 'r') as myfile:
 			finalTargetsFileName = pslTwo.callPSLModelTwo(allSeedsDictionary,inferenceFolder,prefix,detectionFolder,API_USED);
 		elif pipelineStage == "clarifai":
 			finalTargetsFileName = conceptnet_util.orderWordsAccordingToCentroid(centroids, reweightedSeedsFiles, \
-				allSeedsDictionary, inferenceFolder, prefix);
+				allSeedsDictionary, inferenceFolder, prefix, vocab);
 		elif pipelineStage == "merge":
 			finalTargetsFileName = conceptnet_util.orderMergedTargetsAccordingToCentroid(mergeStageDSTuples, \
 				allSeedsDictionary, inferenceFolder, prefix);

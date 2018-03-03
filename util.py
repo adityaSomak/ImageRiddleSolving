@@ -7,7 +7,7 @@ def processAllArgumentsReturnVariables(sysarguments):
 	parser.add_argument("detectionsFolder");
 	parser.add_argument("numPuzzles");
 	parser.add_argument("inferenceFolder");
-	parser.add_argument("api",action="store", choices=["clarifai","resnet"]);
+	parser.add_argument("api",action="store", choices=["clarifai","resnet","vqa"]);
 	parser.add_argument("-stage",action="store");
 	parser.add_argument("-from",action="store");
 	parser.add_argument("-to",action="store");
@@ -19,8 +19,10 @@ def processAllArgumentsReturnVariables(sysarguments):
 
 	if argsdict["api"] == "clarifai":
 		detectionFolder = argsdict["detectionsFolder"]+"Detection/";
-	else:
+	elif argsdict["api"] == "resnet":
 		detectionFolder = argsdict["detectionsFolder"]+"DetectionRes/";
+	else:
+		detectionFolder = argsdict["detectionsFolder"]+"DetectionVQA/";
 	numberOfPuzzles = int(argsdict["numPuzzles"]);
 	inferenceFolder = argsdict["inferenceFolder"];
 	pipelineStage = argsdict["stage"];
