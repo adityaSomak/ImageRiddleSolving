@@ -1,7 +1,7 @@
 # Solving Image Riddles
 
    This repository contains the code with respect to the results presented in [Answering Image Riddles using Vision and Reasoning through Probabilistic Soft Logic](https://arxiv.org/abs/1611.05896). The updated
-   version of this work is accepted in UAI 2018.
+   version of this work is accepted in UAI 2018 (Title: Combining Knowledge and Reasoning through Probabilistic Soft Logic for Image Puzzle Solving).
 
 ## Pre-requisities
 
@@ -79,6 +79,7 @@ usage: postrun/calculatePostRunAccuracy.py [-h] [-cleanup CLEANUP]
 python postrun/calculatePostRunAccuracy.py intermediateFiles/resnet/output_iur_merge_pc1_r/ max -ignoreDevDataFile
 ```
 
+
 ### Gitlab Commit:
 ```
 git status
@@ -86,3 +87,8 @@ git add *.py
 git commit -m "pushing riddle code" *.py
 git push -u origin master
 ```
+
+## Disclaimer
+
+   This is one of the first python-based software I wrote. So, a complete overhaul is required to increase the readability of the code.
+    However, given the pre-processing steps are done correctly, this code should be used to re-produce the results presented in the Image Riddle paper.
