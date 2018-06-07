@@ -52,15 +52,14 @@ python preprocess/EigenvectorCentrality.py intermediateFiles/lemmatizedSeeds_all
  ```
 2. For Clarifai detections, run:
 ```
-python testAllStagesGUR.py intermediateFiles/lemmatizedSeedsCentralizedResNet_3k.txt ../First250riddles/riddlesDetectionAll/ 3333 
- <outputFolder> clarifai -stage all
-
+python testAllStagesGUR.py intermediateFiles/lemmatizedSeedsCentralizedResNet_3k.txt ../First250riddles/riddlesDetectionAll/ 3333  <outputFolder> clarifai -stage all
 usage: testAllStagesGUR.py [-h] [-stage STAGE] [-from FROM] [-to TO]
                            [-par PAR]
                            seedsCentralityfile detectionsFolder numPuzzles
                            inferenceFolder {clarifai,resnet}
 STAGE: all/merge/clarifai
 ```
+Choose `stage` as `all` for running the entire pipeline, `clarifai` for running the greedy solution upto visual detections and `merge` for running upto rank and retrieve stage.
 
 3. For running UR and IUR (termed as BUR in paper) variants, just use `testAllStagesUR.py` and `testAllStagesIUR.py` respectively.
 
@@ -72,15 +71,13 @@ usage: postrun/calculatePostRunAccuracy.py [-h] [-cleanup CLEANUP]
                                    [-summaryFile SUMMARYFILE]
                                    [-ignoreDevDataFile IGNOREDEVDATAFILE]
                                    inferenceFolder maxOrAvg
-                                   
 python postrun/calculatePostRunAccuracy.py intermediateFiles/resnet/output_iur_merge_pc1_r/ max -ignoreDevDataFile
 ```
 
-### ../First250riddles/riddlesDetectionAll/filelist.txt
-
 ### Gitlab Commit:
+```
 git status
 git add *.py
 git commit -m "pushing riddle code" *.py
 git push -u origin master
-
+```
