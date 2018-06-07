@@ -1,9 +1,8 @@
-#import conceptnet_util
+import conceptnet_util
 import SimilarityUtil
 import sys
 import os
 import argparse
-import conceptnet_util
 
 '''
  This file is called after the IUR/UR/GUR scripts are run and it calculates 
@@ -28,36 +27,41 @@ def calculateAverageAccuracy(expectedWord, finalReorderedTargetsFileName, limitS
 	avgSimilarity = avgSimilarity/i
 	return avgSimilarity
 
-def calculateMaxAccuracy(expectedWord, finalReorderedTargetsFileName, limitSuggestions=10):
+def calculateMaxAccuracy(expectedWord, finalReorderedTargetsFileName, predicted_words=None, 
+	limitSuggestions=10):
 	if "-" in expectedWord:
 		expectedWord=expectedWord[:expectedWord.index("-")]
 	maxSimilarity = 0.0
 	similarWord = None
-	with open(finalReorderedTargetsFileName, 'r') as f:
-		i=0
-		for line in f:
-			tokens =line.split("\t")
-			if i==limitSuggestions:
-				break
-			similarity = conceptnet_util.getWord2VecSimilarity(expectedWord,tokens[0].strip(),True)
+	if finalReorderedTargetsFileName is None:
+		for phrase in predicted_words:
+			similarity = conceptnet_util.getWord2VecSimilarity(expectedWord,phrase,True)
 			if similarity > maxSimilarity:
 				maxSimilarity = similarity
-				similarWord = tokens[0].strip()
-			i=i+1
+				similarWord = phrase
+	else:
+		with open(finalReorderedTargetsFileName, 'r') as f:
+			i=0
+			for line in f:
+				tokens =line.split("\t")
+				if i==limitSuggestions:
+					break
+				similarity = conceptnet_util.getWord2VecSimilarity(expectedWord,tokens[0].strip(),True)
+				if similarity > maxSimilarity:
+					maxSimilarity = similarity
+					similarWord = tokens[0].strip()
+				i=i+1
 	return [maxSimilarity,similarWord]
 
-def calculateMaxWordnetAccuracy(expectedWord, finalReorderedTargetsFileName, limitSuggestions=10):
+def calculateMaxWordnetAccuracy(expectedWord, finalReorderedTargetsFileName, 
+	predicted_words=None, limitSuggestions=10):
 	if "-" in expectedWord:
 		expectedWord=expectedWord[:expectedWord.index("-")]
 	maxSimilarity = 0.0
 	similarWord = None
-	with open(finalReorderedTargetsFileName, 'r') as f:
-		i=0
-		for line in f:
-			tokens =line.split("\t")
-			if i==limitSuggestions:
-				break
-			words = tokens[0].strip().split("_")
+	if finalReorderedTargetsFileName is None:
+		for phrase in predicted_words:
+			words = phrase.lower().split(" ")
 			avg_sim = 0
 			for word in words:
 				similarity = SimilarityUtil.word_similarity(expectedWord,word)
@@ -65,8 +69,24 @@ def calculateMaxWordnetAccuracy(expectedWord, finalReorderedTargetsFileName, lim
 			avg_sim = avg_sim/float(len(words))
 			if avg_sim > maxSimilarity:
 				maxSimilarity = avg_sim
-				similarWord = tokens[0].strip()
-			i=i+1
+				similarWord = phrase
+	else:
+		with open(finalReorderedTargetsFileName, 'r') as f:
+			i=0
+			for line in f:
+				tokens =line.split("\t")
+				if i==limitSuggestions:
+					break
+				words = tokens[0].strip().split("_")
+				avg_sim = 0
+				for word in words:
+					similarity = SimilarityUtil.word_similarity(expectedWord,word)
+					avg_sim += similarity
+				avg_sim = avg_sim/float(len(words))
+				if avg_sim > maxSimilarity:
+					maxSimilarity = avg_sim
+					similarWord = tokens[0].strip()
+				i=i+1
 	return [maxSimilarity,similarWord]
 
 def updateHistogram(histogram, sim):
@@ -84,7 +104,7 @@ def updateHistogram(histogram, sim):
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
-	parser.add_argument("inferenceFolder")
+	parser.add_argument("amtFile")
 	parser.add_argument("maxOrAvg")
 	parser.add_argument("-cleanup",action="store",default=False,type=bool)
 	parser.add_argument("-summaryFile",action="store",default=None)
@@ -92,7 +112,7 @@ if __name__ == "__main__":
 	parser.add_argument("-useK",default=20,type=int)      
 	argsdict = vars(parser.parse_args(sys.argv[1:]))
 
-	inferenceFolder = argsdict["inferenceFolder"]
+	amtCSVFile = argsdict["amtFile"]
 	cleanup = bool(argsdict["cleanup"])
 
 	calculateMax = False
@@ -115,43 +135,55 @@ if __name__ == "__main__":
 	# Less than 0.6, < 0.7, < 0.8, <0.9, <1	
 	histogram =[0,0,0,0,0]
 
-	
-	for root, directories, filenames in os.walk(inferenceFolder):
-		totalSim = 0
-		totalDetected=0
-		totalSim_at1 = 0
-		for filename in filenames:
-			filePath = str(os.path.join(root,filename))
-			if filePath.endswith("_inf_all.txt"):
-				expectedWord = filename[4:].replace("_inf_all.txt","")
-				# print expectedWord
-				# Ignore the word if it is used in Dev Set
-				if expectedWord in imagesInDevelopment:
-					continue
+	import csv
+	totalSim = 0
+	totalDetected = 0
+	totalSim_at1 = 0
+	with open(amtCSVFile, 'rb') as csvfile:
+		amtreader = csv.reader(csvfile, delimiter=',')
+		amtreader.next()
+		for row in amtreader:
+			# print row
+			# import pdb
+			# pdb.set_trace()
+			expectedWord = row[31].replace("\"","")
+			answer_text = row[32].lower().replace("\"","")
+			predicted_words = row[32].replace("\"","").lower().split(",")
 
-				if calculateMax:
-					# [sim,similarWord] = calculateMaxAccuracy(expectedWord, filePath, 20)
-					try:
-						[sim_at_1,_] = calculateMaxWordnetAccuracy(expectedWord, filePath, 1)
-						[sim,similarWord] = calculateMaxWordnetAccuracy(expectedWord, filePath, argsdict["useK"]) #20)
-						if summaryFileW != None:
-							if similarWord == None:
-								summaryFileW.write(expectedWord+"\tNONE\t"+str(sim)+"\n")
-							else:
-								summaryFileW.write(expectedWord+"\t"+similarWord+"\t"+str(sim)+"\n")
-					except Exception:
-						sim = 0
-						sim_at_1 = 0
-						totalDetected -= 1
-				else:
-					sim = calculateAverageAccuracy(expectedWord, filePath, 10)	
-				totalSim = sim+totalSim
+			if row[17].strip() == "Rejected":
+				continue 
+			if "not found" in answer_text or "image_url" in answer_text \
+				or "nothing shows" in answer_text or "could not view" in answer_text\
+				or "blank" in answer_text:
+				continue
+
+			if calculateMax:
+				# [sim,similarWord] = calculateMaxAccuracy(expectedWord, filePath, 20)
+				try:
+					[sim_at_1,_] = calculateMaxAccuracy(expectedWord, None, predicted_words, 1)
+					[sim,similarWord] = calculateMaxAccuracy(expectedWord, 
+						None, predicted_words, argsdict["useK"]) #20)
+					# [sim_at_1,_] = calculateMaxWordnetAccuracy(expectedWord, None, predicted_words, 1)
+					# [sim,similarWord] = calculateMaxWordnetAccuracy(expectedWord, 
+					# 	None, predicted_words, argsdict["useK"]) #20)
+					if summaryFileW != None:
+						if similarWord == None:
+							summaryFileW.write(expectedWord+"\tNONE\t"+str(sim)+"\n")
+						else:
+							summaryFileW.write(expectedWord+"\t"+similarWord+"\t"+str(sim)+"\n")
+				except Exception, e:
+					raise e
+					sim = 0
+					sim_at_1 = 0
+					totalDetected -= 1
+			else:
+				sim = calculateAverageAccuracy(expectedWord, None, predicted_words, 10)
+			if similarWord is not None and similarWord != "None":
+				totalSim = sim + totalSim
 				totalSim_at1 += sim_at_1
-				totalDetected = totalDetected+1
+				totalDetected = totalDetected + 1
 				updateHistogram(histogram, sim)
 				print "GT: %s, Pred: %s: (%f) " % (expectedWord, similarWord, sim)
-			elif cleanup:
-				os.remove(filePath)
 		string = str(totalDetected)+","+str(totalSim)
 		print "Examples: %d, Total: %f, Avg: %f" % (totalDetected, totalSim, (totalSim/float(totalDetected)))
 		print "Avg sim @1: %f" % (totalSim_at1/float(totalDetected))

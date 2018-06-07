@@ -3,6 +3,11 @@
    This repository contains the code with respect to the results presented in [Answering Image Riddles using Vision and Reasoning through Probabilistic Soft Logic](https://arxiv.org/abs/1611.05896). The updated
    version of this work is accepted in UAI 2018.
 
+## Pre-requisities
+
+  - Create a python virtual-environment, activate it and install packages using the provided `requirements.txt`.
+  - In the same virtual environment, follow the instructions in `conceptnet_setup_script.sh` to set up ConceptNet5 and its association-space matrix version.
+
 ## Riddles Dataset: Pre-Processing
 
 ### All Seed Collection from Clarifai Files
