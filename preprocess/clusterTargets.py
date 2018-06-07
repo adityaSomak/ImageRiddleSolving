@@ -1,13 +1,13 @@
-import numpy as np
 import sys
-import os
-import mergeTargets
+
+import numpy as np
 import scipy.cluster.hierarchy as hac
-from sklearn.cluster import KMeans
 from scipy.spatial.distance import pdist,squareform
+from sklearn.cluster import KMeans
+
 import conceptnet_util
 import util
-
+from preprocess import mergeTargets
 
 '''
 #######################################################################
@@ -90,7 +90,7 @@ if __name__ == "__main__":
 	# sys.argv[3] = clustering choice
 	
 	[sortedScoreAndIndexList, targetWordsList, targetWordsDictionary,seedsDetected_weights,seedWordsList,allSeedsDictionary] = \
-	mergeTargets.mergeTargetsFromDetectedSeeds(sys.argv[1],sys.argv[2],1,0.1);
+	mergeTargets.mergeTargetsFromDetectedSeeds(sys.argv[1], sys.argv[2], 1, 0.1);
 	
 	if sys.argv[3] == "hac":
 		[clusters,modifiedSortedScoreAndIndexList,Z,pairwiseDistancesTargetWords] = returnClusters(sortedScoreAndIndexList, targetWordsList, \

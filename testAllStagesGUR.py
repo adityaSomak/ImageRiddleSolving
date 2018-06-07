@@ -1,20 +1,18 @@
 from __future__ import print_function
 
-import conceptnet_util
-import numpy as np
-import util
-import sys
 import os
-import random
+import sys
 import time
 
-import mergeTargets
-import clusterTargets
+from joblib import Parallel, delayed
+
 import WordWeightsOptimization3
+import conceptnet_util
 import pslModelOneNewOptimization_v2 as pslOne
 import pslModelTwoNewOptimization as pslTwo
+import util
+from preprocess import mergeTargets, clusterTargets
 
-from joblib import Parallel, delayed 
 
 def calculateRelativeAccuracy(expectedWord, finalReorderedTargetsFileName, limitSuggestions=50):
 	if "-" in expectedWord:

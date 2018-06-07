@@ -1,12 +1,9 @@
 from __future__ import print_function
 
-import mergeTargets
-import clusterTargets
 import sys
-from gurobipy import *
-import util
+
 import conceptnet_util
-import numpy as np
+import util
 
 '''
 #######################################################################

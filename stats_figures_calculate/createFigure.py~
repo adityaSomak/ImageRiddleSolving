@@ -4,10 +4,10 @@ import os
 
 workdir=os.path.join("../../First250riddles/riddlesDetectionAll/Image/")
 
+#outdir = os.path.join("./figureOut2/")
+#f = open('summaryFile.txt','r')
 outdir = os.path.join("./example_figures/")
-f = open('summaryFile.txt','r')
-#outdir = os.path.join("./example_figures/")
-#f = open('negativeSummaryFile.txt','r')
+f = open('negativeSummaryFile.txt','r')
 i=0;
 for line in f:
     print line

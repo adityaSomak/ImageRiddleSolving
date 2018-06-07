@@ -1,12 +1,10 @@
 from __future__ import print_function
 
-import mergeTargets
-import clusterTargets
-import sys
-from gurobipy import *
-from util import *
-import conceptnet_util
 import numpy as np
+
+import conceptnet_util
+from preprocess import mergeTargets, clusterTargets
+from util import *
 
 '''
 #######################################################################
@@ -351,7 +349,7 @@ if __name__ == "__main__":
 	
 	#### Step 2: cluster the merged set of targets
 	[clusters,sortedScoreAndIndexList,Z,pairwiseDistancesTargetWords] = clusterTargets.returnClusters(sortedScoreAndIndexList, \
-	targetWordsList, targetWordsDictonary, orderedSeedWordsList, 3000);
+																									  targetWordsList, targetWordsDictonary, orderedSeedWordsList, 3000);
 	print(pairwiseDistancesTargetWords.shape);
 	print("\tclustering targets completed..");
 	
