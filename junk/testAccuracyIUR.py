@@ -4,13 +4,11 @@ import os
 import sys
 import time
 
-from joblib import Parallel, delayed
-
-import WordWeightsOptimization2
 import conceptnet_util
 import pslModelOneNewOptimization_v2 as pslOne
 import pslModelTwoNewOptimization as pslTwo
 import util
+from misc import WordWeightsOptimization2
 from preprocess import mergeTargets, clusterTargets
 
 
@@ -32,51 +30,17 @@ def calculateRelativeAccuracy(expectedWord, finalReorderedTargetsFileName, limit
 			i=i+1;
 	return [maxSimilarity,similarWord];
 
-def solveIndividualRiddles(detectionFolder,prefix,allSeedsDictionary,inferenceFolder,seedsCentralityFile,part):
-	sumIndividualAccuracy = 0;
-	#for part in range(1,5):
-	trainingImage = detectionFolder+prefix+"_"+str(part)+".txt";
-	WordWeightsOptimization2.VERBOSE = False;
-	reorderedSeedsFiles = WordWeightsOptimization2.reorderWeightsBasedOnPopularity(allSeedsDictionary,\
-	detectionFolder,prefix,int(part),int(part),inferenceFolder);
-	reweightedSeedsFileName = reorderedSeedsFiles[0];
-	print("\tmerging targets completed..");
-
-	#### Step 1: Merge targets from different seeds.
-	mergeTargets.VERBOSE= False;
-	[sortedScoreAndIndexList, targetWordsList, targetWordsDictonary,seedsDetected_weights,\
-	orderedSeedWordsList,allSeedsDictionary] = mergeTargets.mergeTargetsFromDetectedSeeds(\
-	reweightedSeedsFileName, seedsCentralityFile,1500);
-	print("\tmerging targets completed..");
-
-	#### Step 2: cluster the merged set of targets
-	[sortedScoreAndIndexList,pairwiseDistancesTargetWords] = clusterTargets.returnClustersFast(\
-	sortedScoreAndIndexList, targetWordsList, targetWordsDictonary, orderedSeedWordsList, 2500);
-	print(pairwiseDistancesTargetWords.shape);
-	print("\tclustering targets completed..");
-
-	#### Step 3: create 1-word and 2-word model
-	pslOne.VERBOSE = False;
-	finalReorderedTargetsFileName = pslOne.optimizeAndInferConceptsModelOneNew(\
-	allSeedsDictionary,seedsDetected_weights,\
-	orderedSeedWordsList,reweightedSeedsFileName,sortedScoreAndIndexList, targetWordsList, targetWordsDictonary, \
-	pairwiseDistancesTargetWords);
-
-	[acc,simWord]= calculateRelativeAccuracy(prefix, finalReorderedTargetsFileName, 20);	
-	print('\taccuracy %g' % acc);
-	sumIndividualAccuracy = sumIndividualAccuracy+acc;
-	return sumIndividualAccuracy;
 	
 #(0.8,1,0.8,2,1,4),\ #done
-parameterSpace = [(0.9,1,0.4,2,1,4)];#\
-#(0.8,1,0.4,1,1,4),\
+parameterSpace = [(0.9,1,0.4,2,1,4)];
+#(0.9,2,0.3,2,1,1),(0.9,2,0.7,2,1,1),\
+#(0.8,2,0.2,2,1,1),(0.9,1,0.2,2,1,1),\
+#(0.8,1,0.4,1,1,4),(0.9,1,0.7,2,1,4)];
 #(0.9,1,0.4,1,1,4),\
 #(0.9,2,0.3,1,3,4),\
 #(0.9,2,0.3,3,3,4)];
 
-if len(sys.argv) < 4:
-	print("python ",sys.argv[0]," <seedsCentralityfile> <detectionsFolder> <number-of-puzzles> <inferenceFolder> <from>,<to> parallel")
-	sys.exit();
+print("python ",sys.argv[0]," <seedsCentralityfile> <detectionsFolder> <number-of-puzzles> <inferenceFolder> <from>,<to>")
 
 seedsCentralityFile = sys.argv[1];
 allSeedsDictionary = util.populateModifiedSeedsAndConcreteScoreDictionary(seedsCentralityFile);
@@ -148,12 +112,37 @@ for choice in parameterSpace:
 			try:
 				print('Iteration for prefix:\t%s\n' % (prefix));
 				#TODO: parallelize this for loop
-				#sumAccuracy = solveIndividualRiddles(detectionFolder,prefix,allSeedsDictionary,inferenceFolder,seedsCentralityFile);
-				#arguments = [detectionFolder,prefix,allSeedsDictionary,inferenceFolder,seedsCentralityFile];
-				sumAccuracy = Parallel(n_jobs=4)(delayed(solveIndividualRiddles)(detectionFolder,prefix,allSeedsDictionary,\
-					inferenceFolder,seedsCentralityFile,part) for part in range(1,5));
-				for acc in sumAccuracy:
-					sumIndividualAccuracy=acc+sumAccuracy;
+				for part in range(1,5):
+					trainingImage = detectionFolder+prefix+"_"+str(part)+".txt";
+					WordWeightsOptimization2.VERBOSE = False;
+					reorderedSeedsFiles = WordWeightsOptimization2.reorderWeightsBasedOnPopularity(allSeedsDictionary, \
+																								   detectionFolder, prefix, int(part), int(part), inferenceFolder);
+					reweightedSeedsFileName = reorderedSeedsFiles[0];
+					print("\tmerging targets completed..");
+				
+					#### Step 1: Merge targets from different seeds.
+					mergeTargets.VERBOSE= False;
+					[sortedScoreAndIndexList, targetWordsList, targetWordsDictonary,seedsDetected_weights,\
+					orderedSeedWordsList,allSeedsDictionary] = mergeTargets.mergeTargetsFromDetectedSeeds(\
+					reweightedSeedsFileName, seedsCentralityFile,1500);
+					print("\tmerging targets completed..");
+			
+					#### Step 2: cluster the merged set of targets
+					[sortedScoreAndIndexList,pairwiseDistancesTargetWords] = clusterTargets.returnClustersFast(\
+					sortedScoreAndIndexList, targetWordsList, targetWordsDictonary, orderedSeedWordsList, 2500);
+					print(pairwiseDistancesTargetWords.shape);
+					print("\tclustering targets completed..");
+			
+					#### Step 3: create 1-word and 2-word model
+					pslOne.VERBOSE = False;
+					finalReorderedTargetsFileName = pslOne.optimizeAndInferConceptsModelOneNew(\
+					allSeedsDictionary,seedsDetected_weights,\
+					orderedSeedWordsList,reweightedSeedsFileName,sortedScoreAndIndexList, targetWordsList, targetWordsDictonary, \
+					pairwiseDistancesTargetWords);
+			
+					[acc,simWord]= calculateRelativeAccuracy(prefix, finalReorderedTargetsFileName, 20);	
+					print('\taccuracy %g' % acc);
+					sumIndividualAccuracy = sumIndividualAccuracy+acc;
 					
 				pslTwo.VERBOSE= False;
 				finalTargetsFileName = pslTwo.callPSLModelTwo(allSeedsDictionary,inferenceFolder,prefix);

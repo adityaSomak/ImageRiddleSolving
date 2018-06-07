@@ -1,5 +1,7 @@
 import conceptnet_util
 import sys
+from util import computeNormalizedValue
+from collections import OrderedDict
 
 #######################################################################
 ################ IGNORE FILE
@@ -36,6 +38,7 @@ def processClarifaiJsonFile(fileName):
 ###############################################
 ############# Start of script
 ###############################################
+word = ""
 if 	len(sys.argv) < 3:
 	print("python suggestTargets.py <seedsCentralityConcreteNessfile> <detectedSeedsFile>");
 	sys.exit();
@@ -50,7 +53,7 @@ detectionsDict = OrderedDict();
 for i in range(0,len(detections)):
 	detection = detections[i];
 	detection = allSeedsDictionary[detection][1];
-	concreteNessScore = allSeedsDictionary[detection][0]);
+	concreteNessScore = allSeedsDictionary[detection][0]
 	if concreteNessScore > 3:
 		detectionsDict[detection] = (weights[i],concreteNessScore,None);
 	detectionsDict[detection] = (weights[i],concreteNessScore,set(conceptnet_util.getSuperOrSubclasses("/c/en/"+word,True)));

@@ -6,11 +6,11 @@ import time
 
 from joblib import Parallel, delayed
 
-import WordWeightsOptimization2
 import conceptnet_util
 import pslModelOneNewOptimization_v2 as pslOne
 import pslModelTwoNewOptimization as pslTwo
 import util
+from misc import WordWeightsOptimization2
 from preprocess import mergeTargets, clusterTargets
 
 

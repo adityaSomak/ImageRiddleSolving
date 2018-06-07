@@ -6,11 +6,11 @@ import time
 
 from joblib import Parallel, delayed
 
-import WordWeightsOptimization3
 import conceptnet_util
 import pslModelOneNewOptimization_v2 as pslOne
 import pslModelTwoNewOptimization as pslTwo
 import util
+from misc import WordWeightsOptimization3
 from preprocess import mergeTargets, clusterTargets
 
 
@@ -167,8 +167,8 @@ with open(sortedFilePrefixList_file, 'r') as myfile:
 			print('Iteration for prefix:\t%s\n' % (prefix));
 			
 			WordWeightsOptimization3.VERBOSE = False;
-			reorderedSeedsFileNames = WordWeightsOptimization3.reorderWeightsBasedOnCloseness(allSeedsDictionary,\
-				detectionFolder,prefix,inferenceFolder);
+			reorderedSeedsFileNames = WordWeightsOptimization3.reorderWeightsBasedOnCloseness(allSeedsDictionary, \
+																							  detectionFolder, prefix, inferenceFolder);
 			sumAccuracy=0;
 			if len(sys.argv) > 6 and sys.argv[7] == "parallel":
 				sumAccuracy = Parallel(n_jobs=4)(delayed(solveIndividualRiddles)(detectionFolder, prefix,\

@@ -33,12 +33,12 @@ def calculateRelativeAccuracy(expectedWord, finalReorderedTargetsFileName, limit
 def solveIndividualRiddles(detectionFolder,prefix,allSeedsDictionary,inferenceFolder,seedsCentralityFile,
 	pipelineStage, imageNum, API_USED):
 	import pslModelOneNewOptimization_v2 as pslOne
-	import WordWeightsOptimization2
+	from misc import WordWeightsOptimization2
 	sumIndividualAccuracy = 0;
 	trainingImage = detectionFolder+prefix+"_"+str(imageNum)+".txt";
 	WordWeightsOptimization2.VERBOSE = False;
-	reorderedSeedsFiles = WordWeightsOptimization2.reorderWeightsBasedOnPopularity(allSeedsDictionary,\
-	detectionFolder,prefix,int(imageNum),int(imageNum),inferenceFolder,API_USED);
+	reorderedSeedsFiles = WordWeightsOptimization2.reorderWeightsBasedOnPopularity(allSeedsDictionary, \
+																				   detectionFolder, prefix, int(imageNum), int(imageNum), inferenceFolder, API_USED);
 	reweightedSeedsFileName = reorderedSeedsFiles[0];
 	print("\treweighting seeds completed..");
 	if pipelineStage == "clarifai":

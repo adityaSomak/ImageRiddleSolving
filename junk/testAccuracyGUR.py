@@ -2,11 +2,11 @@ from __future__ import print_function
 
 import sys
 
-import WordWeightsOptimization3
 import conceptnet_util
 import pslModelOneNewOptimization_v2 as pslOne
 import pslModelTwoNewOptimization as pslTwo
 import util
+from misc import WordWeightsOptimization3
 from preprocess import mergeTargets, clusterTargets
 
 
@@ -109,8 +109,8 @@ for choice in parameterSpace:
 			try:
 				print('Iteration for prefix:\t%s\n' % (prefix));
 				WordWeightsOptimization3.VERBOSE = False;
-				reorderedSeedsFileNames = WordWeightsOptimization3.reorderWeightsBasedOnCloseness(allSeedsDictionary,\
-				detectionFolder,prefix,inferenceFolder);
+				reorderedSeedsFileNames = WordWeightsOptimization3.reorderWeightsBasedOnCloseness(allSeedsDictionary, \
+																								  detectionFolder, prefix, inferenceFolder);
 				
 				for part in range(1,5):
 					trainingImage = detectionFolder+prefix+"_"+str(part)+".txt";
