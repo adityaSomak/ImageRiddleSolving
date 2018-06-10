@@ -88,6 +88,11 @@ git commit -m "pushing riddle code" *.py
 git push -u origin master
 ```
 
+## Author Affiliation:
+
+ The code is developed by Somak Aditya, when he was working as a Graduate Research Assistant in Prof. Chitta Baral's lab
+ at CIDSE, Arizona State Univerisity.
+
 ## Disclaimer
 
    This is one of the first python-based software I wrote. So, a complete overhaul is required to increase the readability of the code.
