@@ -25,7 +25,7 @@ grako==3.13.0rc5
 gurobipy==6.5.0
 h5py==2.6.0
 html5lib==0.999
-httplib2==0.8
+httplib2==0.19.0
 ipython==2.3.0
 itsdangerous==0.24
 Jinja2==2.8
