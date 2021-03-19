@@ -28,7 +28,7 @@ html5lib==0.999
 httplib2==0.8
 ipython==2.3.0
 itsdangerous==0.24
-Jinja2==2.8
+Jinja2==2.11.3
 joblib==0.10.0
 Landscape-Client==14.12
 langcodes-py2==1.1.2
