@@ -24,7 +24,7 @@ gensim==0.13.1
 grako==3.13.0rc5
 gurobipy==6.5.0
 h5py==2.6.0
-html5lib==0.999
+html5lib==0.99999999
 httplib2==0.8
 ipython==2.3.0
 itsdangerous==0.24
