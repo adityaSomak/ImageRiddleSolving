@@ -83,7 +83,7 @@ unity-lens-photos==1.0
 urllib3==1.7.1
 virtualenv==15.0.1
 warc==0.2.1
-Werkzeug==0.11.10
+Werkzeug==0.15.3
 xdiagnose===3.6.3build2
 xmltodict==0.10.2
 zope.interface==4.0.5
