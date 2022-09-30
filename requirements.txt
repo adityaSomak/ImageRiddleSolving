@@ -29,7 +29,7 @@ httplib2==0.8
 ipython==2.3.0
 itsdangerous==0.24
 Jinja2==2.8
-joblib==0.10.0
+joblib==1.2.0
 Landscape-Client==14.12
 langcodes-py2==1.1.2
 limits==1.1.1
